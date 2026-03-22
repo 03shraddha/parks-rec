@@ -1,0 +1,113 @@
+"use client";
+
+import type { LayerVisibility } from "./Map";
+
+interface LayerControlsProps {
+  visible: LayerVisibility;
+  onChange: (key: keyof LayerVisibility) => void;
+}
+
+/* Each layer has an anime-themed accent colour for its active glow */
+const LAYERS: {
+  key: keyof LayerVisibility;
+  label: string;
+  icon: string;
+  color: string;       // active background
+  glow: string;        // CSS shadow colour
+  border: string;      // active border
+}[] = [
+  {
+    key: "trees",
+    label: "Tree Canopy",
+    icon: "🌳",
+    color: "linear-gradient(135deg, #10B981, #059669)",
+    glow: "rgba(16, 185, 129, 0.50)",
+    border: "rgba(52, 211, 153, 0.60)",
+  },
+  {
+    key: "parks",
+    label: "Parks",
+    icon: "🏞",
+    color: "linear-gradient(135deg, #34D399, #10B981)",
+    glow: "rgba(52, 211, 153, 0.50)",
+    border: "rgba(52, 211, 153, 0.60)",
+  },
+  {
+    key: "lakes",
+    label: "Waterbodies",
+    icon: "💧",
+    color: "linear-gradient(135deg, #06B6D4, #0284C7)",
+    glow: "rgba(6, 182, 212, 0.50)",
+    border: "rgba(103, 232, 249, 0.60)",
+  },
+  {
+    key: "heat",
+    label: "Heat Map",
+    icon: "🌡",
+    color: "linear-gradient(135deg, #F97316, #DC2626)",
+    glow: "rgba(249, 115, 22, 0.50)",
+    border: "rgba(251, 146, 60, 0.60)",
+  },
+  {
+    key: "busStops",
+    label: "Bus Stops",
+    icon: "🚌",
+    color: "linear-gradient(135deg, #A78BFA, #7C3AED)",
+    glow: "rgba(124, 58, 237, 0.50)",
+    border: "rgba(167, 139, 250, 0.60)",
+  },
+];
+
+export default function LayerControls({ visible, onChange }: LayerControlsProps) {
+  return (
+    <div className="flex flex-col gap-1.5 pointer-events-auto">
+      {/* Section label */}
+      <p
+        className="font-syne text-[10px] font-bold uppercase tracking-[0.15em] px-1 mb-0.5"
+        style={{ color: "var(--violet-light)" }}
+      >
+        ✦ Layers
+      </p>
+
+      {LAYERS.map(({ key, label, icon, color, glow, border }) => {
+        const on = visible[key];
+        return (
+          <button
+            key={key}
+            onClick={() => onChange(key)}
+            aria-pressed={on}
+            className="flex items-center gap-2.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all duration-200"
+            style={
+              on
+                ? {
+                    background: color,
+                    border: `1px solid ${border}`,
+                    color: "#fff",
+                    boxShadow: `0 0 14px ${glow}, 0 4px 16px rgba(0,0,0,0.4)`,
+                  }
+                : {
+                    background: "rgba(8, 14, 36, 0.88)",
+                    backdropFilter: "blur(16px)",
+                    border: "1px solid rgba(148, 163, 184, 0.12)",
+                    color: "var(--text-secondary)",
+                  }
+            }
+          >
+            {/* Icon badge */}
+            <span
+              className="text-sm leading-none w-5 h-5 flex items-center justify-center rounded-md shrink-0"
+              style={
+                on
+                  ? { background: "rgba(255,255,255,0.20)" }
+                  : { background: "rgba(148, 163, 184, 0.08)" }
+              }
+            >
+              {icon}
+            </span>
+            <span className="font-syne">{label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
