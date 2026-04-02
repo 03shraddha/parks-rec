@@ -1,0 +1,117 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Cubbon Park Morning Walk",
+        "date": "Every Sunday",
+        "time": "6:00 AM",
+        "venue": "Cubbon Park",
+        "address": "Kasturba Road, Sampangi Rama Nagar, Bengaluru",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Fitness"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5946, 12.9772] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Lalbagh Flower Show",
+        "date": "Republic Day Season",
+        "time": "9:00 AM – 8:00 PM",
+        "venue": "Lalbagh Botanical Garden",
+        "address": "Mavalli, Bengaluru",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5851, 12.9507] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bangalore Bird Walk",
+        "date": "First Saturday of the month",
+        "time": "6:30 AM",
+        "venue": "Ulsoor Lake",
+        "address": "Ulsoor Lake, Bengaluru",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Nature"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6233, 12.9820] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Yoga in the Park",
+        "date": "Every Saturday",
+        "time": "7:00 AM",
+        "venue": "Sankey Tank",
+        "address": "Sankey Road, Bengaluru",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Wellness"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5826, 13.0148] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Heritage Walk – Pete Area",
+        "date": "Second Sunday of the month",
+        "time": "7:30 AM",
+        "venue": "Krishnarajendra Market",
+        "address": "KR Market, Bengaluru",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Heritage"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5750, 12.9640] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Namma Bengaluru Run",
+        "date": "Last Sunday of the month",
+        "time": "6:00 AM",
+        "venue": "Kanteerava Stadium",
+        "address": "Kasturba Road, Bengaluru",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Running"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5944, 12.9695] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Cycle to Work Day",
+        "date": "Every Wednesday",
+        "time": "7:00 AM",
+        "venue": "Town Hall",
+        "address": "Ambedkar Veedhi, Bengaluru",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cycling"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5891, 12.9761] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Hebbal Lake Cleanup Drive",
+        "date": "Third Sunday of the month",
+        "time": "7:00 AM",
+        "venue": "Hebbal Lake",
+        "address": "Hebbal, Bengaluru",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Environment"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5998, 13.0432] }
+    }
+  ]
+}

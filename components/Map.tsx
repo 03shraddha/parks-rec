@@ -284,7 +284,10 @@ export default function Map({
     if (!source) return;
 
     if (visibleLayers.events) {
-      fetch("/api/events")
+      // On GitHub Pages (static export) the API route is removed; fall back to static GeoJSON.
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+      const eventsUrl = basePath ? `${basePath}/data/events.geojson` : "/api/events";
+      fetch(eventsUrl)
         .then((res) => {
           if (!res.ok) throw new Error(`Events API returned ${res.status}`);
           return res.json();
@@ -336,16 +339,6 @@ export default function Map({
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function addDataSources(map: maplibregl.Map) {
-  const heatTilesUrl = process.env.NEXT_PUBLIC_HEAT_TILES_URL ?? "/tiles/heat/{z}/{x}/{y}.png";
-
-  map.addSource(SOURCE_IDS.heat, {
-    type: "raster",
-    tiles: [heatTilesUrl],
-    tileSize: 256,
-    minzoom: 8,
-    maxzoom: 14,
-  });
-
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   for (const [id, file] of [
     [SOURCE_IDS.lakes, "lakes.geojson"],
@@ -376,12 +369,24 @@ function addDataSources(map: maplibregl.Map) {
 }
 
 function addDataLayers(map: maplibregl.Map) {
-  // Heat raster (bottom-most custom layer)
+  // Heat layer — urban heat islands derived from tree density (sparse trees = hotter).
+  // Uses the existing tree-density hexbins with an inverted colour scale so areas
+  // lacking canopy show as orange/red. No external raster tiles needed.
   map.addLayer({
     id: LAYER_IDS.heatRaster,
-    type: "raster",
-    source: SOURCE_IDS.heat,
-    paint: { "raster-opacity": 0.55 },
+    type: "fill",
+    source: SOURCE_IDS.trees,
+    paint: {
+      "fill-color": [
+        "interpolate", ["linear"],
+        ["get", "tree_count"],
+        0,   "#FF4500", // scorching — no tree cover
+        50,  "#FF8C00", // hot
+        150, "#FFD700", // warm
+        300, "#90EE90", // cool — dense canopy
+      ],
+      "fill-opacity": 0.55,
+    },
     layout: { visibility: "none" },
   });
 
