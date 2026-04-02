@@ -25,10 +25,10 @@ jobs:
           node-version: 20
           cache: npm
 
-      # Use npm install (not npm ci) so platform-specific optional binaries
-      # (e.g. lightningcss-linux-x64-gnu used by Tailwind CSS v4) are resolved
-      # fresh for the Linux runner instead of being read from the Windows lockfile.
-      - run: npm install
+      # Delete the Windows-generated lockfile so npm resolves optional platform
+      # binaries (e.g. lightningcss-linux-x64-gnu for Tailwind CSS v4) fresh
+      # for the Linux runner rather than skipping them.
+      - run: rm -f package-lock.json && npm install
 
       - name: Build static export
         env:
