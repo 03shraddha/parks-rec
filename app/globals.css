@@ -1,14 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ── Anime Design System ─────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   Anime Design System — Light mode default, dark mode via [data-theme="dark"]
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Light mode (default) ─────────────────────────────────────────────── */
 :root {
-  /* Depths */
+  /* Backgrounds — warm ivory, Ghibli watercolour paper */
+  --bg-deep:    #F7F4EF;
+  --bg-surface: #FFFFFF;
+  --bg-card:    rgba(255, 255, 252, 0.90);
+
+  /* Accents */
+  --violet:       #6D28D9;
+  --violet-light: #7C3AED;
+  --violet-glow:  rgba(109, 40, 217, 0.20);
+
+  --jade:       #047857;
+  --jade-light: #059669;
+  --jade-glow:  rgba(4, 120, 87, 0.22);
+
+  --amber:       #B45309;
+  --amber-light: #D97706;
+  --amber-glow:  rgba(180, 83, 9, 0.22);
+
+  --cyan:       #0369A1;
+  --cyan-light: #0284C7;
+  --cyan-glow:  rgba(3, 105, 161, 0.20);
+
+  --sakura:       #BE185D;
+  --sakura-light: #DB2777;
+  --sakura-glow:  rgba(190, 24, 93, 0.18);
+
+  /* Text — manga ink on warm paper */
+  --text-display:   #0D0D0D;   /* 100% — hero, one per screen */
+  --text-primary:   #1A1625;   /* 90%  — body content */
+  --text-secondary: #4B5563;   /* 60%  — labels, captions */
+  --text-disabled:  #9CA3AF;   /* 40%  — hints, timestamps */
+  --text-muted:     #9CA3AF;   /* alias kept for legacy usage */
+
+  /* Borders */
+  --border-subtle: rgba(26, 22, 37, 0.08);
+  --border-violet: rgba(109, 40, 217, 0.22);
+  --border-jade:   rgba(4, 120, 87, 0.22);
+  --border-amber:  rgba(180, 83, 9, 0.22);
+
+  --background: var(--bg-deep);
+  --foreground: var(--text-primary);
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  /* Backgrounds — deep midnight navy */
   --bg-deep:    #060A18;
   --bg-surface: #0A1028;
   --bg-card:    rgba(8, 14, 36, 0.90);
 
-  /* Accent colours */
+  /* Accents — neon / bioluminescent */
   --violet:       #7C3AED;
   --violet-light: #A78BFA;
   --violet-glow:  rgba(124, 58, 237, 0.45);
@@ -30,28 +78,29 @@
   --sakura-glow:  rgba(236, 72, 153, 0.35);
 
   /* Text */
-  --text-primary:   #E2E8F0;
-  --text-secondary: #94A3B8;
-  --text-muted:     #475569;
+  --text-display:   #F8FAFC;   /* 100% — hero, one per screen */
+  --text-primary:   #E2E8F0;   /* 90%  — body content */
+  --text-secondary: #94A3B8;   /* 60%  — labels, captions */
+  --text-disabled:  #475569;   /* 40%  — hints, timestamps */
+  --text-muted:     #475569;   /* alias kept for legacy usage */
 
   /* Borders */
   --border-subtle: rgba(148, 163, 184, 0.10);
   --border-violet: rgba(124, 58, 237, 0.40);
   --border-jade:   rgba(16, 185, 129, 0.40);
   --border-amber:  rgba(245, 158, 11, 0.40);
-
-  --background: var(--bg-deep);
-  --foreground: var(--text-primary);
 }
 
-/* ── Base ────────────────────────────────────────────────────────────────── */
+/* ── Base ─────────────────────────────────────────────────────────────── */
 body {
   background: var(--bg-deep);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Primary body font: Space Grotesk */
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
 }
 
 html, body, #__next {
@@ -59,16 +108,11 @@ html, body, #__next {
   width: 100%;
 }
 
-/* ── Keyframe Animations ─────────────────────────────────────────────────── */
+/* ── Keyframe animations ──────────────────────────────────────────────── */
 
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0);    }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }
 
 @keyframes shimmer {
@@ -76,61 +120,74 @@ html, body, #__next {
   100% { background-position:  200% 0; }
 }
 
-@keyframes glow-pulse-violet {
-  0%, 100% { box-shadow: 0 0 8px var(--violet-glow), 0 0 20px var(--violet-glow); }
-  50%       { box-shadow: 0 0 16px var(--violet-glow), 0 0 48px var(--violet-glow); }
-}
-
-@keyframes glow-pulse-jade {
-  0%, 100% { box-shadow: 0 0 8px var(--jade-glow); }
-  50%       { box-shadow: 0 0 24px var(--jade-glow); }
-}
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
 @keyframes banner-float {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
+  0%, 100% { transform: translateX(-50%) translateY(0);    }
   50%       { transform: translateX(-50%) translateY(-3px); }
 }
 
-/* ── Reusable utility classes ────────────────────────────────────────────── */
+@keyframes surprise-toast {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0);    }
+}
 
-/* Frosted glass panel — the base of every UI card */
+/* Drains from full-width to zero over the toast lifetime */
+@keyframes toast-drain {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* ── Reusable utility classes ─────────────────────────────────────────── */
+
+/* Frosted glass panel — base of every UI card */
 .anime-panel {
   background: var(--bg-card);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid var(--border-violet);
   animation: slide-up 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
 .anime-panel-jade  { border-color: var(--border-jade);  }
 .anime-panel-amber { border-color: var(--border-amber); }
 
-.glow-violet { box-shadow: 0 0 14px var(--violet-glow), 0 8px 32px rgba(0,0,0,0.6); }
-.glow-jade   { box-shadow: 0 0 14px var(--jade-glow),   0 8px 32px rgba(0,0,0,0.6); }
-.glow-amber  { box-shadow: 0 0 14px var(--amber-glow),  0 8px 32px rgba(0,0,0,0.6); }
+.glow-violet { box-shadow: 0 0 14px var(--violet-glow), 0 8px 32px rgba(0,0,0,0.12); }
+.glow-jade   { box-shadow: 0 0 14px var(--jade-glow),   0 8px 32px rgba(0,0,0,0.12); }
+.glow-amber  { box-shadow: 0 0 14px var(--amber-glow),  0 8px 32px rgba(0,0,0,0.12); }
 
-/* Gradient text helper */
-.gradient-text-violet {
-  background: linear-gradient(135deg, var(--violet-light), var(--sakura-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+[data-theme="dark"] .glow-violet { box-shadow: 0 0 14px var(--violet-glow), 0 8px 32px rgba(0,0,0,0.6); }
+[data-theme="dark"] .glow-jade   { box-shadow: 0 0 14px var(--jade-glow),   0 8px 32px rgba(0,0,0,0.6); }
+[data-theme="dark"] .glow-amber  { box-shadow: 0 0 14px var(--amber-glow),  0 8px 32px rgba(0,0,0,0.6); }
+
+/* Legacy Syne alias — kept so existing className uses still compile */
+.font-syne { font-family: 'Space Grotesk', sans-serif; }
+
+/* ── Design system typography helpers ────────────────────────────────── */
+
+/* Primary body / subheading font */
+.font-grotesk { font-family: 'Space Grotesk', sans-serif; }
+
+/* Tertiary / metadata font — always pair with uppercase + wide tracking */
+.font-mono-ui { font-family: 'Space Mono', monospace; }
+
+/* Doto — reserved for hero display moments only */
+.font-doto { font-family: 'Doto', sans-serif; }
+
+/* Three-layer text helpers */
+.text-display {
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-display);
 }
-
-.gradient-text-jade {
-  background: linear-gradient(135deg, var(--jade-light), var(--cyan-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Syne font for headings & hero numbers */
-.font-syne {
-  font-family: 'Syne', sans-serif;
+.text-tertiary {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.625rem;      /* 10px */
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-disabled);
 }
 
 /* Shimmer loading skeleton */
@@ -138,22 +195,19 @@ html, body, #__next {
   background: linear-gradient(
     90deg,
     var(--bg-surface) 25%,
-    rgba(124, 58, 237, 0.12) 50%,
+    rgba(109, 40, 217, 0.10) 50%,
     var(--bg-surface) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite;
 }
 
-/* ── MapLibre overrides ───────────────────────────────────────────────────── */
+/* ── MapLibre overrides ───────────────────────────────────────────────── */
 
-.maplibregl-canvas {
-  outline: none;
-}
+.maplibregl-canvas { outline: none; }
 
-/* Attribution bubble — dark glass */
 .maplibregl-ctrl-attrib {
-  background: rgba(6, 10, 24, 0.80) !important;
+  background: var(--bg-card) !important;
   backdrop-filter: blur(8px) !important;
   border-radius: 8px !important;
   font-size: 10px !important;
@@ -161,14 +215,13 @@ html, body, #__next {
   border: 1px solid var(--border-subtle) !important;
 }
 
-/* Nav / zoom controls */
 .maplibregl-ctrl-group {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-violet) !important;
   backdrop-filter: blur(20px) !important;
   border-radius: 12px !important;
   overflow: hidden;
-  box-shadow: 0 0 12px var(--violet-glow), 0 8px 24px rgba(0,0,0,0.5) !important;
+  box-shadow: 0 0 10px var(--violet-glow), 0 8px 24px rgba(0,0,0,0.10) !important;
 }
 
 .maplibregl-ctrl-group button {
@@ -180,24 +233,13 @@ html, body, #__next {
 }
 
 .maplibregl-ctrl-group button:hover {
-  background: rgba(124, 58, 237, 0.18) !important;
+  background: rgba(109, 40, 217, 0.10) !important;
   color: var(--violet-light) !important;
 }
 
-.maplibregl-ctrl-group button:last-child {
-  border-bottom: none !important;
-}
+.maplibregl-ctrl-group button:last-child { border-bottom: none !important; }
 
-/* Geolocate dot */
-.maplibregl-user-location-dot {
-  background-color: var(--violet-light) !important;
-  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.4) !important;
-}
-
-/* ── Custom scrollbar ────────────────────────────────────────────────────── */
+/* ── Custom scrollbar ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: var(--border-violet);
-  border-radius: 3px;
-}
+::-webkit-scrollbar-thumb { background: var(--border-violet); border-radius: 3px; }

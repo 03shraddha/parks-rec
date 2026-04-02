@@ -56,15 +56,31 @@ const LAYERS: {
     glow: "rgba(124, 58, 237, 0.50)",
     border: "rgba(167, 139, 250, 0.60)",
   },
+  {
+    key: "trails",
+    label: "Trails",
+    icon: "🥾",
+    color: "linear-gradient(135deg, #86EFAC, #22C55E)",
+    glow: "rgba(134, 239, 172, 0.50)",
+    border: "rgba(134, 239, 172, 0.60)",
+  },
+  {
+    key: "events",
+    label: "Events",
+    icon: "🎉",
+    color: "linear-gradient(135deg, #F472B6, #EC4899)",
+    glow: "rgba(244, 114, 182, 0.50)",
+    border: "rgba(249, 168, 212, 0.60)",
+  },
 ];
 
 export default function LayerControls({ visible, onChange }: LayerControlsProps) {
   return (
     <div className="flex flex-col gap-1.5 pointer-events-auto">
-      {/* Section label */}
+      {/* Section label — TERTIARY: Space Mono ALL CAPS, edge-anchored, de-emphasised */}
       <p
-        className="font-syne text-[10px] font-bold uppercase tracking-[0.15em] px-1 mb-0.5"
-        style={{ color: "var(--violet-light)" }}
+        className="font-mono-ui text-[10px] uppercase tracking-[0.18em] px-1 mb-0.5"
+        style={{ color: "var(--text-disabled)" }}
       >
         ✦ Layers
       </p>
@@ -76,6 +92,7 @@ export default function LayerControls({ visible, onChange }: LayerControlsProps)
             key={key}
             onClick={() => onChange(key)}
             aria-pressed={on}
+            aria-label={`Toggle ${label} layer`}
             className="flex items-center gap-2.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all duration-200"
             style={
               on
@@ -86,9 +103,9 @@ export default function LayerControls({ visible, onChange }: LayerControlsProps)
                     boxShadow: `0 0 14px ${glow}, 0 4px 16px rgba(0,0,0,0.4)`,
                   }
                 : {
-                    background: "rgba(8, 14, 36, 0.88)",
+                    background: "var(--bg-card)",
                     backdropFilter: "blur(16px)",
-                    border: "1px solid rgba(148, 163, 184, 0.12)",
+                    border: "1px solid var(--border-subtle)",
                     color: "var(--text-secondary)",
                   }
             }
@@ -99,12 +116,13 @@ export default function LayerControls({ visible, onChange }: LayerControlsProps)
               style={
                 on
                   ? { background: "rgba(255,255,255,0.20)" }
-                  : { background: "rgba(148, 163, 184, 0.08)" }
+                  : { background: "var(--border-subtle)" }
               }
             >
               {icon}
             </span>
-            <span className="font-syne">{label}</span>
+            {/* SECONDARY: Space Grotesk body label */}
+            <span className="font-grotesk">{label}</span>
           </button>
         );
       })}

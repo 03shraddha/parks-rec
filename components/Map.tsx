@@ -12,7 +12,8 @@
  *  - Expose layer visibility controls via the `visibleLayers` prop
  */
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useImperativeHandle, useState } from "react";
+import type { Ref } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
@@ -23,10 +24,29 @@ import {
   LAYER_IDS,
   SOURCE_IDS,
 } from "@/lib/mapStyle";
+
+export type Theme = "light" | "dark";
 import type { ScoredRoute, SegmentInfo } from "@/lib/shadeScoring";
 import type { Coordinate } from "@/lib/graphhopper";
 
+/** Properties returned by /api/events for each event feature */
+export interface EventInfo {
+  title: string;
+  date: string;
+  time: string;
+  venue: string;
+  address: string;
+  ticket_url: string | null;
+  thumbnail: string | null;
+  category: string;
+}
+
 export type PinMode = "origin" | "destination" | null;
+
+/** Imperative handle exposed to parent via ref */
+export interface MapHandle {
+  flyTo(lng: number, lat: number, zoom?: number): void;
+}
 
 export interface LayerVisibility {
   trees: boolean;
@@ -34,6 +54,8 @@ export interface LayerVisibility {
   lakes: boolean;
   heat: boolean;
   busStops: boolean;
+  trails: boolean;
+  events: boolean;
 }
 
 interface MapProps {
@@ -43,8 +65,12 @@ interface MapProps {
   fastRoute: ScoredRoute | null;
   coolRoute: ScoredRoute | null;
   visibleLayers: LayerVisibility;
+  theme: Theme;
   onPinDrop: (mode: "origin" | "destination", coord: Coordinate) => void;
   onSegmentClick: (info: SegmentInfo) => void;
+  onEventClick: (info: EventInfo) => void;
+  // React 19: ref is a regular prop, no forwardRef needed
+  ref?: Ref<MapHandle>;
 }
 
 export default function Map({
@@ -54,15 +80,37 @@ export default function Map({
   fastRoute,
   coolRoute,
   visibleLayers,
+  theme,
   onPinDrop,
   onSegmentClick,
+  onEventClick,
+  ref,
 }: MapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const [eventsError, setEventsError] = useState(false);
   const originMarkerRef = useRef<maplibregl.Marker | null>(null);
   const destMarkerRef = useRef<maplibregl.Marker | null>(null);
   const pinModeRef = useRef<PinMode>(pinMode);
   pinModeRef.current = pinMode;
+
+  // Keep latest state in refs so we can re-apply after a style swap
+  const fastRouteRef = useRef(fastRoute);
+  const coolRouteRef = useRef(coolRoute);
+  const visibleLayersRef = useRef(visibleLayers);
+  fastRouteRef.current = fastRoute;
+  coolRouteRef.current = coolRoute;
+  visibleLayersRef.current = visibleLayers;
+
+  // Track whether the map has been initialised yet (skip the first theme effect run)
+  const mapReadyRef = useRef(false);
+
+  // ── Imperative handle — exposes flyTo to parent via ref ───────────────────
+  useImperativeHandle(ref, () => ({
+    flyTo(lng: number, lat: number, zoom = 15) {
+      mapRef.current?.flyTo({ center: [lng, lat], zoom, speed: 1.4, curve: 1.4 });
+    },
+  }));
 
   // ── Init map ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -70,7 +118,7 @@ export default function Map({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: getBaseStyleUrl(),
+      style: getBaseStyleUrl(theme),
       center: BENGALURU_CENTER,
       zoom: DEFAULT_ZOOM,
       attributionControl: false,
@@ -83,6 +131,7 @@ export default function Map({
     map.on("load", () => {
       addDataSources(map);
       addDataLayers(map);
+      mapReadyRef.current = true;
     });
 
     // Click handler for pin dropping and segment taps
@@ -90,6 +139,16 @@ export default function Map({
       const mode = pinModeRef.current;
       if (mode) {
         onPinDrop(mode, { lng: e.lngLat.lng, lat: e.lngLat.lat });
+        return;
+      }
+
+      // Check if an event pin was clicked (higher priority than route lines)
+      const eventFeatures = map.queryRenderedFeatures(e.point, {
+        layers: [LAYER_IDS.events],
+      });
+      if (eventFeatures.length > 0) {
+        const props = eventFeatures[0].properties as EventInfo;
+        if (props) onEventClick(props);
         return;
       }
 
@@ -117,6 +176,14 @@ export default function Map({
       map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
     });
 
+    // Events layer cursor
+    map.on("mouseenter", LAYER_IDS.events, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", LAYER_IDS.events, () => {
+      map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
+    });
+
     mapRef.current = map;
     return () => {
       map.remove();
@@ -124,6 +191,35 @@ export default function Map({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Theme / map style swap ────────────────────────────────────────────────
+  useEffect(() => {
+    const map = mapRef.current;
+    // Skip the very first run — map initialised with the correct style already
+    if (!map || !mapReadyRef.current) return;
+
+    map.setStyle(getBaseStyleUrl(theme));
+
+    map.once("style.load", () => {
+      addDataSources(map);
+      addDataLayers(map);
+      // Re-apply current route data
+      updateRouteSource(map, SOURCE_IDS.routeFast, fastRouteRef.current);
+      updateRouteSource(map, SOURCE_IDS.routeCool, coolRouteRef.current);
+      // Re-apply layer visibility
+      const vis = visibleLayersRef.current;
+      setLayerVisibility(map, LAYER_IDS.treeDensity, vis.trees);
+      setLayerVisibility(map, LAYER_IDS.parksFill, vis.parks);
+      setLayerVisibility(map, LAYER_IDS.parksStroke, vis.parks);
+      setLayerVisibility(map, LAYER_IDS.lakesFill, vis.lakes);
+      setLayerVisibility(map, LAYER_IDS.lakesStroke, vis.lakes);
+      setLayerVisibility(map, LAYER_IDS.heatRaster, vis.heat);
+      setLayerVisibility(map, LAYER_IDS.busStops, vis.busStops);
+      setLayerVisibility(map, LAYER_IDS.trails, vis.trails);
+      setLayerVisibility(map, LAYER_IDS.events, vis.events);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme]);
 
   // ── Pin mode cursor ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -136,7 +232,7 @@ export default function Map({
     if (!mapRef.current) return;
     originMarkerRef.current?.remove();
     if (origin) {
-      const el = createPinEl("#2D6A1F", "A");
+      const el = createPinEl(COLORS.coolRoute, "A");
       originMarkerRef.current = new maplibregl.Marker({ element: el, anchor: "bottom" })
         .setLngLat([origin.lng, origin.lat])
         .addTo(mapRef.current);
@@ -148,7 +244,7 @@ export default function Map({
     if (!mapRef.current) return;
     destMarkerRef.current?.remove();
     if (destination) {
-      const el = createPinEl("#C67C2B", "B");
+      const el = createPinEl(COLORS.fastRoute, "B");
       destMarkerRef.current = new maplibregl.Marker({ element: el, anchor: "bottom" })
         .setLngLat([destination.lng, destination.lat])
         .addTo(mapRef.current);
@@ -174,14 +270,66 @@ export default function Map({
     setLayerVisibility(map, LAYER_IDS.lakesStroke, visibleLayers.lakes);
     setLayerVisibility(map, LAYER_IDS.heatRaster, visibleLayers.heat);
     setLayerVisibility(map, LAYER_IDS.busStops, visibleLayers.busStops);
+    setLayerVisibility(map, LAYER_IDS.trails, visibleLayers.trails);
+    setLayerVisibility(map, LAYER_IDS.events, visibleLayers.events);
   }, [visibleLayers]);
 
+  // ── Events data fetch ─────────────────────────────────────────────────────
+  // Fetch /api/events when the events layer is turned on; clear when turned off.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const source = map.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    if (visibleLayers.events) {
+      fetch("/api/events")
+        .then((res) => {
+          if (!res.ok) throw new Error(`Events API returned ${res.status}`);
+          return res.json();
+        })
+        .then((geojson) => {
+          // Re-acquire source after async — style may have swapped
+          const s = mapRef.current?.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
+          s?.setData(geojson);
+        })
+        .catch((err) => {
+          console.warn("Failed to load events:", err);
+          setEventsError(true);
+        });
+    } else {
+      source.setData({ type: "FeatureCollection", features: [] });
+    }
+  }, [visibleLayers.events]);
+
   return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0 w-full h-full"
-      style={{ background: "#F5F0E8" }}
-    />
+    <div className="absolute inset-0 w-full h-full">
+      <div
+        ref={containerRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ background: "var(--bg-deep)" }}
+      />
+      {eventsError && (
+        <div
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 pointer-events-none"
+          style={{
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(248,113,113,0.25)",
+            borderRadius: "999px",
+            padding: "4px 12px",
+            color: "rgba(252,165,165,0.85)",
+            fontSize: "10px",
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.1em",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Events unavailable
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -198,15 +346,17 @@ function addDataSources(map: maplibregl.Map) {
     maxzoom: 14,
   });
 
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   for (const [id, file] of [
     [SOURCE_IDS.lakes, "lakes.geojson"],
     [SOURCE_IDS.parks, "parks.geojson"],
     [SOURCE_IDS.trees, "tree-density.geojson"],
     [SOURCE_IDS.busStops, "bus-stops.geojson"],
+    [SOURCE_IDS.trails, "trails.geojson"],
   ] as [string, string][]) {
     map.addSource(id, {
       type: "geojson",
-      data: `/data/${file}`,
+      data: `${basePath}/data/${file}`,
     });
   }
 
@@ -217,6 +367,12 @@ function addDataSources(map: maplibregl.Map) {
       data: { type: "FeatureCollection", features: [] },
     });
   }
+
+  // Events source (empty initially; populated on demand when layer is toggled on)
+  map.addSource(SOURCE_IDS.events, {
+    type: "geojson",
+    data: { type: "FeatureCollection", features: [] },
+  });
 }
 
 function addDataLayers(map: maplibregl.Map) {
@@ -290,6 +446,36 @@ function addDataLayers(map: maplibregl.Map) {
       "circle-radius": 4,
       "circle-stroke-color": "#fff",
       "circle-stroke-width": 1.5,
+    },
+    layout: { visibility: "none" },
+  });
+
+  // Trails / walking paths — thin dashed green, drawn under route lines
+  map.addLayer({
+    id: LAYER_IDS.trails,
+    type: "line",
+    source: SOURCE_IDS.trails,
+    paint: {
+      "line-color": COLORS.trailLine,
+      "line-width": 1.5,
+      // Dashed pattern: 4px dash, 3px gap — lighter than the solid route lines
+      "line-dasharray": [4, 3],
+      "line-opacity": 0.75,
+    },
+    layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+  });
+
+  // Events — pink circle pins, drawn above data layers but below route lines
+  map.addLayer({
+    id: LAYER_IDS.events,
+    type: "circle",
+    source: SOURCE_IDS.events,
+    paint: {
+      "circle-color": COLORS.eventPin,
+      "circle-radius": 8,
+      "circle-stroke-color": COLORS.eventPinBorder,
+      "circle-stroke-width": 2,
+      "circle-opacity": 0.9,
     },
     layout: { visibility: "none" },
   });

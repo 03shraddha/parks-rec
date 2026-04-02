@@ -39,7 +39,8 @@ export async function fetchRoutes(
   destination: Coordinate,
   maxPaths = 3
 ): Promise<GHRoute[]> {
-  const key = process.env.GRAPHHOPPER_API_KEY;
+  // Works server-side (GRAPHHOPPER_API_KEY) and client-side (NEXT_PUBLIC_GRAPHHOPPER_API_KEY)
+  const key = process.env.GRAPHHOPPER_API_KEY ?? process.env.NEXT_PUBLIC_GRAPHHOPPER_API_KEY;
   if (!key) throw new Error("GRAPHHOPPER_API_KEY env var not set.");
 
   const url = new URL(`${GH_BASE}/route`);
@@ -57,9 +58,7 @@ export async function fetchRoutes(
   url.searchParams.append("point", `${origin.lat},${origin.lng}`);
   url.searchParams.append("point", `${destination.lat},${destination.lng}`);
 
-  const resp = await fetch(url.toString(), {
-    next: { revalidate: 0 }, // don't cache at fetch level — we cache at KV level
-  });
+  const resp = await fetch(url.toString());
 
   if (!resp.ok) {
     const body = await resp.text();

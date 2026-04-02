@@ -47,10 +47,10 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
       {/* Coloured top accent line */}
       <div className="h-0.5 w-full" style={{ background: gradient }} />
 
-      {/* Header */}
+      {/* Header — SECONDARY: road name is supporting context */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2">
         <span
-          className="font-syne font-bold text-sm truncate pr-2"
+          className="font-grotesk font-semibold text-sm truncate pr-2"
           style={{ color: "var(--text-primary)" }}
         >
           {info.road_name ?? "This segment"}
@@ -77,27 +77,37 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
         </button>
       </div>
 
-      {/* Shade score — hero number */}
-      <div className="px-4 pb-3">
-        <div className="flex items-end justify-between mb-2">
+      {/* Shade score — PRIMARY hero: ONE thing seen first, absurdly large */}
+      <div className="px-4 pb-1">
+        {/* TERTIARY label above the hero */}
+        <p
+          className="font-mono-ui uppercase tracking-[0.16em] mb-1"
+          style={{ fontSize: "9px", color: "var(--text-disabled)" }}
+        >
+          Shade Score
+        </p>
+
+        {/* PRIMARY: display-size number — the visual anchor of this popup */}
+        <div className="flex items-end gap-2 mb-2">
           <span
-            className="font-syne text-[10px] font-bold uppercase tracking-[0.15em]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Shade Score
-          </span>
-          <span
-            className="font-syne font-bold text-3xl leading-none"
-            style={{ color, textShadow: `0 0 16px ${glow}` }}
+            className="font-grotesk font-bold leading-none"
+            style={{ fontSize: "4rem", color, textShadow: `0 0 20px ${glow}` }}
           >
             {shade}
-            <span className="text-base">%</span>
+            <span className="font-grotesk font-semibold" style={{ fontSize: "1.5rem" }}>%</span>
+          </span>
+          {/* SECONDARY: shade quality label, tight to the number */}
+          <span
+            className="font-grotesk font-semibold text-xs pb-2"
+            style={{ color }}
+          >
+            {label}
           </span>
         </div>
 
         {/* Progress bar */}
         <div
-          className="h-2 rounded-full overflow-hidden mb-1.5"
+          className="h-2 rounded-full overflow-hidden mb-3"
           style={{ background: "rgba(148,163,184,0.10)" }}
         >
           <div
@@ -109,13 +119,6 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
             }}
           />
         </div>
-
-        <p
-          className="font-syne text-[10px] font-semibold uppercase tracking-wide"
-          style={{ color }}
-        >
-          {label}
-        </p>
       </div>
 
       {/* Divider */}
@@ -176,14 +179,16 @@ function InfoRow({
       </span>
 
       <div>
+        {/* TERTIARY: Space Mono ALL CAPS label */}
         <p
-          className="font-syne text-[9px] uppercase tracking-[0.14em] leading-tight mb-0.5"
-          style={{ color: "var(--text-muted)" }}
+          className="font-mono-ui text-[9px] uppercase tracking-[0.14em] leading-tight mb-0.5"
+          style={{ color: "var(--text-disabled)" }}
         >
           {label}
         </p>
+        {/* SECONDARY: Space Grotesk body value */}
         <p
-          className="text-xs leading-snug"
+          className="font-grotesk text-xs leading-snug"
           style={{ color: "var(--text-primary)" }}
         >
           {value}

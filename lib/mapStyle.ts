@@ -7,14 +7,26 @@
 export const BENGALURU_CENTER: [number, number] = [77.5946, 12.9716]; // lng, lat
 export const DEFAULT_ZOOM = 12;
 
-/** Base style URL — requires NEXT_PUBLIC_MAPTILER_KEY in env */
-export function getBaseStyleUrl(): string {
+/** Base style URLs — requires NEXT_PUBLIC_MAPTILER_KEY in env */
+function _key(): string {
   const key = process.env.NEXT_PUBLIC_MAPTILER_KEY;
-  if (!key) {
-    console.warn("NEXT_PUBLIC_MAPTILER_KEY not set — map tiles may not load.");
-  }
-  // "dataviz-dark" gives a deep midnight canvas that complements the anime UI
-  return `https://api.maptiler.com/maps/dataviz-dark/style.json?key=${key}`;
+  if (!key) console.warn("NEXT_PUBLIC_MAPTILER_KEY not set — map tiles may not load.");
+  return key ?? "";
+}
+
+/** Light base: warm dataviz-light matches the Ghibli paper aesthetic */
+export function getLightStyleUrl(): string {
+  return `https://api.maptiler.com/maps/dataviz-light/style.json?key=${_key()}`;
+}
+
+/** Dark base: deep midnight for the neon-anime dark mode */
+export function getDarkStyleUrl(): string {
+  return `https://api.maptiler.com/maps/dataviz-dark/style.json?key=${_key()}`;
+}
+
+/** Convenience — returns the correct URL for the given theme */
+export function getBaseStyleUrl(theme: "light" | "dark" = "light"): string {
+  return theme === "dark" ? getDarkStyleUrl() : getLightStyleUrl();
 }
 
 /**
@@ -48,6 +60,13 @@ export const COLORS = {
 
   // Segment highlight on tap
   segmentHighlight: "#E879F9", // pink-violet pulse
+
+  // Trails / walking paths — light dashed green, distinct from route lines
+  trailLine: "#86EFAC", // pastel green, lighter than coolRoute (#10B981)
+
+  // Events — hot pink pins
+  eventPin:       "#F472B6",
+  eventPinBorder: "#fff",
 } as const;
 
 /** Layer IDs used throughout the app */
@@ -66,6 +85,8 @@ export const LAYER_IDS = {
   segmentHL:       "segment-highlight",
   pinOrigin:       "pin-origin",
   pinDest:         "pin-dest",
+  trails:          "trails",
+  events:          "events",
 } as const;
 
 /** Source IDs */
@@ -78,4 +99,6 @@ export const SOURCE_IDS = {
   routeFast: "route-fast",
   routeCool: "route-cool",
   pins:      "pins",
+  trails:    "trails",
+  events:    "events",
 } as const;

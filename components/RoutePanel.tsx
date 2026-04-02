@@ -55,7 +55,7 @@ export default function RoutePanel({ fastRoute, coolRoute, loading, error }: Rou
           boxShadow: "0 0 12px rgba(220,38,38,0.25), 0 8px 24px rgba(0,0,0,0.5)",
         }}
       >
-        <p className="text-xs font-syne" style={{ color: "#FCA5A5" }}>
+        <p className="font-grotesk text-xs" style={{ color: "#FCA5A5" }}>
           ⚠ {error}
         </p>
       </div>
@@ -74,7 +74,6 @@ export default function RoutePanel({ fastRoute, coolRoute, loading, error }: Rou
         <RouteCard
           label="Cool Route"
           icon="🌿"
-          theme="jade"
           headerGradient="linear-gradient(135deg, #10B981, #059669)"
           glowColor="var(--jade-glow)"
           borderColor="var(--border-jade)"
@@ -93,7 +92,6 @@ export default function RoutePanel({ fastRoute, coolRoute, loading, error }: Rou
         <RouteCard
           label="Fast Route"
           icon="⚡"
-          theme="amber"
           headerGradient="linear-gradient(135deg, #F59E0B, #D97706)"
           glowColor="var(--amber-glow)"
           borderColor="var(--border-amber)"
@@ -102,9 +100,10 @@ export default function RoutePanel({ fastRoute, coolRoute, loading, error }: Rou
         />
       )}
 
+      {/* TERTIARY hint — Space Mono ALL CAPS */}
       <p
-        className="text-[10px] text-center font-syne tracking-wide"
-        style={{ color: "var(--text-muted)" }}
+        className="font-mono-ui text-[9px] text-center uppercase tracking-[0.12em]"
+        style={{ color: "var(--text-disabled)" }}
       >
         Tap a route segment on the map for details
       </p>
@@ -125,7 +124,6 @@ function RouteCard({
 }: {
   label: string;
   icon: string;
-  theme: "jade" | "amber";
   headerGradient: string;
   glowColor: string;
   borderColor: string;
@@ -149,13 +147,13 @@ function RouteCard({
         className="flex items-center justify-between px-4 py-2.5"
         style={{ background: headerGradient }}
       >
-        <span className="flex items-center gap-2 font-syne font-bold text-sm text-white">
+        <span className="flex items-center gap-2 font-grotesk font-bold text-sm text-white">
           <span>{icon}</span>
           {label}
         </span>
         {badge && (
           <span
-            className="text-[10px] font-syne font-bold px-2 py-0.5 rounded-full"
+            className="font-mono-ui text-[9px] uppercase tracking-[0.10em] px-2 py-0.5 rounded-full"
             style={{
               background: "rgba(255,255,255,0.22)",
               color: "#fff",
@@ -167,18 +165,68 @@ function RouteCard({
         )}
       </div>
 
-      {/* Stats row */}
-      <div
-        className="grid grid-cols-3 py-3"
-        style={{ borderBottom: `1px solid rgba(148,163,184,0.08)` }}
-      >
-        <Stat value={formatDistance(route.distance)} label="Distance" statColor={statColor} />
-        <Stat value={formatDuration(route.time)} label="Walk time" statColor={statColor} />
-        <Stat value={`${route.shadePct}%`} label="Shade" statColor={statColor} highlight />
+      {/* Stats — three-layer hierarchy */}
+      <div className="px-4 pt-3 pb-1">
+        {/* PRIMARY: Walk time — the hero number, seen first */}
+        <div className="flex items-baseline gap-1 mb-0.5">
+          <span
+            className="font-grotesk font-bold leading-none"
+            style={{ fontSize: "2.5rem", color: statColor }}
+          >
+            {formatDuration(route.time)}
+          </span>
+        </div>
+        {/* TERTIARY label for the hero */}
+        <p
+          className="font-mono-ui uppercase tracking-[0.14em] mb-3"
+          style={{ fontSize: "9px", color: "var(--text-disabled)" }}
+        >
+          Walk time
+        </p>
+
+        {/* SECONDARY: Distance — grouped tight (8px) to primary */}
+        <div className="flex items-baseline gap-1 mb-0.5">
+          <span
+            className="font-grotesk font-semibold text-base leading-none"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {formatDistance(route.distance)}
+          </span>
+        </div>
+        {/* TERTIARY label for secondary stat */}
+        <p
+          className="font-mono-ui uppercase tracking-[0.14em] mb-3"
+          style={{ fontSize: "9px", color: "var(--text-disabled)" }}
+        >
+          Distance
+        </p>
       </div>
 
-      {/* Shade progress bar */}
-      <div className="px-4 py-3">
+      {/* ONE VISUAL BREAK — Shade % absurdly prominent against the rest */}
+      <div
+        className="mx-4 mb-3 px-3 py-2 rounded-xl flex items-center justify-between"
+        style={{
+          background: "rgba(148,163,184,0.06)",
+          border: `1px solid ${borderColor}`,
+        }}
+      >
+        <p
+          className="font-mono-ui uppercase tracking-[0.14em]"
+          style={{ fontSize: "9px", color: "var(--text-disabled)" }}
+        >
+          Shade cover
+        </p>
+        <span
+          className="font-grotesk font-bold leading-none"
+          style={{ fontSize: "1.75rem", color: statColor, textShadow: `0 0 12px ${glowColor}` }}
+        >
+          {route.shadePct}
+          <span className="text-sm font-semibold">%</span>
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="px-4 pb-3">
         <div
           className="h-1.5 rounded-full overflow-hidden"
           style={{ background: "rgba(148,163,184,0.12)" }}
@@ -197,39 +245,4 @@ function RouteCard({
   );
 }
 
-/* ── Stat cell ─────────────────────────────────────────────────────────────── */
-function Stat({
-  value,
-  label,
-  statColor,
-  highlight = false,
-}: {
-  value: string;
-  label: string;
-  statColor: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div
-      className="flex flex-col items-center gap-0.5 px-2"
-      style={
-        highlight
-          ? { borderLeft: "1px solid rgba(148,163,184,0.08)" }
-          : {}
-      }
-    >
-      <span
-        className="font-syne font-bold text-base leading-tight"
-        style={{ color: statColor }}
-      >
-        {value}
-      </span>
-      <span
-        className="font-syne text-[9px] uppercase tracking-[0.12em]"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
+/* Stat component removed — hierarchy is now rendered inline in RouteCard */
