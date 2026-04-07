@@ -41,6 +41,26 @@ export interface EventInfo {
   category: string;
 }
 
+/** Properties of a clicked heatmap hexbin */
+export interface HeatmapInfo {
+  tree_count: number;
+  lng: number;
+  lat: number;
+}
+
+/** Properties of a clicked trail feature */
+export interface TrailInfo {
+  name: string;
+  surface: string;
+  length_m: number;
+}
+
+/** A GeoJSON event feature with typed properties and coordinates */
+export interface EventFeature {
+  properties: EventInfo;
+  geometry: { type: string; coordinates: [number, number] };
+}
+
 export type PinMode = "origin" | "destination" | null;
 
 /** Imperative handle exposed to parent via ref */
@@ -69,6 +89,9 @@ interface MapProps {
   onPinDrop: (mode: "origin" | "destination", coord: Coordinate) => void;
   onSegmentClick: (info: SegmentInfo) => void;
   onEventClick: (info: EventInfo) => void;
+  onHeatmapClick?: (info: HeatmapInfo) => void;
+  onTrailClick?: (info: TrailInfo) => void;
+  onEventsLoaded?: (features: EventFeature[]) => void;
   // React 19: ref is a regular prop, no forwardRef needed
   ref?: Ref<MapHandle>;
 }
@@ -84,6 +107,9 @@ export default function Map({
   onPinDrop,
   onSegmentClick,
   onEventClick,
+  onHeatmapClick,
+  onTrailClick,
+  onEventsLoaded,
   ref,
 }: MapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -142,13 +168,35 @@ export default function Map({
         return;
       }
 
-      // Check if an event pin was clicked (higher priority than route lines)
+      // Check if an event pin was clicked (highest priority)
       const eventFeatures = map.queryRenderedFeatures(e.point, {
         layers: [LAYER_IDS.events],
       });
       if (eventFeatures.length > 0) {
         const props = eventFeatures[0].properties as EventInfo;
         if (props) onEventClick(props);
+        return;
+      }
+
+      // Check if a trail was clicked
+      const trailFeatures = map.queryRenderedFeatures(e.point, {
+        layers: [LAYER_IDS.trails],
+      });
+      if (trailFeatures.length > 0) {
+        const props = trailFeatures[0].properties as TrailInfo;
+        if (props && onTrailClick) onTrailClick(props);
+        return;
+      }
+
+      // Check if a heatmap hexbin was clicked
+      const heatFeatures = map.queryRenderedFeatures(e.point, {
+        layers: [LAYER_IDS.heatRaster],
+      });
+      if (heatFeatures.length > 0) {
+        const props = heatFeatures[0].properties as { tree_count: number };
+        if (props && onHeatmapClick) {
+          onHeatmapClick({ tree_count: props.tree_count ?? 0, lng: e.lngLat.lng, lat: e.lngLat.lat });
+        }
         return;
       }
 
@@ -181,6 +229,22 @@ export default function Map({
       map.getCanvas().style.cursor = "pointer";
     });
     map.on("mouseleave", LAYER_IDS.events, () => {
+      map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
+    });
+
+    // Trails cursor
+    map.on("mouseenter", LAYER_IDS.trails, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", LAYER_IDS.trails, () => {
+      map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
+    });
+
+    // Heatmap cursor
+    map.on("mouseenter", LAYER_IDS.heatRaster, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", LAYER_IDS.heatRaster, () => {
       map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
     });
 
@@ -274,6 +338,22 @@ export default function Map({
     setLayerVisibility(map, LAYER_IDS.events, visibleLayers.events);
   }, [visibleLayers]);
 
+  // ── Trails auto-fit ──────────────────────────────────────────────────────
+  // When trails are toggled on, fit the map to show all trail locations across Bangalore.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+    if (visibleLayers.trails) {
+      // Pre-computed bbox of all 8 static trail features in Bangalore
+      const TRAILS_BOUNDS: [[number, number], [number, number]] = [
+        [77.5800, 12.9012], // sw corner (Sankey Tank / Bannerghatta)
+        [77.6401, 13.0447], // ne corner (Indiranagar / Hebbal)
+      ];
+      map.fitBounds(TRAILS_BOUNDS, { padding: 60, duration: 800 });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleLayers.trails]);
+
   // ── Events data fetch ─────────────────────────────────────────────────────
   // Fetch /api/events when the events layer is turned on; clear when turned off.
   useEffect(() => {
@@ -296,6 +376,8 @@ export default function Map({
           // Re-acquire source after async — style may have swapped
           const s = mapRef.current?.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
           s?.setData(geojson);
+          // Notify parent with the loaded event features for the side panel
+          if (onEventsLoaded) onEventsLoaded(geojson.features ?? []);
         })
         .catch((err) => {
           console.warn("Failed to load events:", err);
@@ -455,17 +537,17 @@ function addDataLayers(map: maplibregl.Map) {
     layout: { visibility: "none" },
   });
 
-  // Trails / walking paths — thin dashed green, drawn under route lines
+  // Trails / walking paths — dashed green, drawn under route lines
   map.addLayer({
     id: LAYER_IDS.trails,
     type: "line",
     source: SOURCE_IDS.trails,
     paint: {
       "line-color": COLORS.trailLine,
-      "line-width": 1.5,
-      // Dashed pattern: 4px dash, 3px gap — lighter than the solid route lines
+      "line-width": 2.5,
+      // Dashed pattern: 4px dash, 3px gap — distinct from solid route lines
       "line-dasharray": [4, 3],
-      "line-opacity": 0.75,
+      "line-opacity": 0.90,
     },
     layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
   });

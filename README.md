@@ -23,6 +23,10 @@ Drop two pins, get two routes side-by-side — one fast, one cool. Every segment
 - **⚡ Fast Route** — gets you there quickest
 - **Tap any segment** — see exact shade %, tree count, species, nearest park
 - **Layer toggles** — Tree Canopy, Parks, Waterbodies, Heat Map, Bus Stops, Trails, Events
+- **Heat Map legend** — floating colour scale (Scorching → Cool); tap any hexbin to see tree count and shade tier
+- **Trails** — toggle on to auto-zoom to all 8 Bangalore walking trails; tap a trail for name, surface and distance
+- **Events side panel** — toggle Events to open a scrollable list of Bengaluru events with category, venue, time and frequency; tap any row to fly to it on the map
+- **Location search** — restricted to Bangalore (no global noise); type an address or apartment name and get relevant results
 - **Surprise Me** — flies you to a random unvisited park with a one-liner
 - **Live events** — outdoor events in Bengaluru pulled from Google (server mode only)
 - **Light / Dark theme** — Ghibli watercolour paper vs. midnight neon

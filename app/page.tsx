@@ -7,7 +7,11 @@ import SurpriseMe from "@/components/SurpriseMe";
 import RoutePanel from "@/components/RoutePanel";
 import SegmentPopup from "@/components/SegmentPopup";
 import EventPopup from "@/components/EventPopup";
-import type { LayerVisibility, PinMode, Theme, MapHandle, EventInfo } from "@/components/Map";
+import HeatmapLegend from "@/components/HeatmapLegend";
+import HeatmapPopup from "@/components/HeatmapPopup";
+import TrailPopup from "@/components/TrailPopup";
+import EventsPanel from "@/components/EventsPanel";
+import type { LayerVisibility, PinMode, Theme, MapHandle, EventInfo, HeatmapInfo, TrailInfo, EventFeature } from "@/components/Map";
 import type { ScoredRoute, SegmentInfo } from "@/lib/shadeScoring";
 import { scoreRoute, pickRoutes } from "@/lib/shadeScoring";
 import type { Coordinate } from "@/lib/graphhopper";
@@ -72,6 +76,15 @@ export default function HomePage() {
   // ── Event popup ──────────────────────────────────────────────────────────
   const [eventInfo, setEventInfo] = useState<EventInfo | null>(null);
 
+  // ── Heatmap popup ─────────────────────────────────────────────────────────
+  const [heatmapInfo, setHeatmapInfo] = useState<HeatmapInfo | null>(null);
+
+  // ── Trail popup ───────────────────────────────────────────────────────────
+  const [trailInfo, setTrailInfo] = useState<TrailInfo | null>(null);
+
+  // ── Events panel list ─────────────────────────────────────────────────────
+  const [eventsList, setEventsList] = useState<EventFeature[]>([]);
+
   // ── Handlers ─────────────────────────────────────────────────────────────
   const fetchRoute = useCallback(
     async (orig: Coordinate, dest: Coordinate) => {
@@ -125,7 +138,12 @@ export default function HomePage() {
   );
 
   const toggleLayer = useCallback((key: keyof LayerVisibility) => {
-    setVisibleLayers((prev) => ({ ...prev, [key]: !prev[key] }));
+    setVisibleLayers((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      // Clear events list when events layer is turned off
+      if (key === "events" && prev.events) setEventsList([]);
+      return next;
+    });
   }, []);
 
   const handleReset = useCallback(() => {
@@ -154,6 +172,9 @@ export default function HomePage() {
         onPinDrop={handlePinDrop}
         onSegmentClick={setSegmentInfo}
         onEventClick={setEventInfo}
+        onHeatmapClick={setHeatmapInfo}
+        onTrailClick={setTrailInfo}
+        onEventsLoaded={setEventsList}
       />
 
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
@@ -251,6 +272,7 @@ export default function HomePage() {
 
         {/* Layer controls + Surprise Me — bottom left */}
         <div className="w-full md:w-auto flex flex-col gap-2">
+          {visibleLayers.heat && <HeatmapLegend />}
           <LayerControls visible={visibleLayers} onChange={toggleLayer} />
           <SurpriseMe
             onFlyTo={(lng, lat) => mapHandleRef.current?.flyTo(lng, lat)}
@@ -287,6 +309,37 @@ export default function HomePage() {
       {eventInfo && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20">
           <EventPopup info={eventInfo} onClose={() => setEventInfo(null)} />
+        </div>
+      )}
+
+      {/* ── Events side panel — shows when events layer is active ─────────── */}
+      {visibleLayers.events && eventsList.length > 0 && !eventInfo && (
+        <div className="absolute top-20 right-4 z-20 pointer-events-none">
+          <EventsPanel
+            events={eventsList}
+            onEventSelect={(lng, lat, info) => {
+              mapHandleRef.current?.flyTo(lng, lat, 15);
+              setEventInfo(info);
+            }}
+            onClose={() => {
+              setEventsList([]);
+              toggleLayer("events");
+            }}
+          />
+        </div>
+      )}
+
+      {/* ── Heatmap popup ─────────────────────────────────────────────────── */}
+      {heatmapInfo && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-40 md:left-4 md:translate-x-0 z-20">
+          <HeatmapPopup info={heatmapInfo} onClose={() => setHeatmapInfo(null)} />
+        </div>
+      )}
+
+      {/* ── Trail popup ───────────────────────────────────────────────────── */}
+      {trailInfo && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-40 md:left-4 md:translate-x-0 z-20">
+          <TrailPopup info={trailInfo} onClose={() => setTrailInfo(null)} />
         </div>
       )}
 
@@ -367,8 +420,8 @@ function PinControls({
       try {
         const key = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "";
         const encoded = encodeURIComponent(value.trim());
-        // Bias results toward Bengaluru with proximity
-        const url = `https://api.maptiler.com/geocoding/${encoded}.json?key=${key}&proximity=77.5946,12.9716&language=en&limit=5`;
+        // Restrict results to Bangalore bounding box + India only
+        const url = `https://api.maptiler.com/geocoding/${encoded}.json?key=${key}&proximity=77.5946,12.9716&bbox=77.30,12.70,77.85,13.15&country=IN&language=en&limit=5`;
         const res = await fetch(url);
         const data = await res.json();
         setSuggestions(data.features ?? []);
