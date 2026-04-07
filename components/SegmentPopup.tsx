@@ -1,14 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import type { SegmentInfo } from "@/lib/shadeScoring";
+import ShadeExplainerTooltip from "./ShadeExplainerTooltip";
 
 interface SegmentPopupProps {
   info: SegmentInfo;
   onClose: () => void;
 }
 
+function getSegmentKey(info: SegmentInfo): string {
+  return `flagged_${(info.road_name ?? info.nearest_park ?? String(info.shade_score)).replace(/\s+/g, "_")}`;
+}
+
 export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
   const shade = Math.round(info.shade_score * 100);
+  const [showExplainer, setShowExplainer] = useState(false);
+  const segKey = getSegmentKey(info);
+  const [flagged, setFlagged] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem(segKey);
+  });
+  const handleFlag = () => {
+    if (flagged) { localStorage.removeItem(segKey); setFlagged(false); }
+    else { localStorage.setItem(segKey, "1"); setFlagged(true); }
+  };
 
   /* Colour system: well-shaded = jade, partial = amber, exposed = crimson */
   const { color, glow, gradient, label } =
@@ -78,14 +94,32 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
       </div>
 
       {/* Shade score — PRIMARY hero: ONE thing seen first, absurdly large */}
-      <div className="px-4 pb-1">
-        {/* TERTIARY label above the hero */}
-        <p
-          className="font-mono-ui uppercase tracking-[0.16em] mb-1"
-          style={{ fontSize: "9px", color: "var(--text-disabled)" }}
-        >
-          Shade Score
-        </p>
+      <div className="px-4 pb-1" style={{ position: "relative" }}>
+        {/* Shade score label row with explainer */}
+        <div className="flex items-center gap-1.5 mb-1 relative">
+          <p
+            className="font-mono-ui uppercase tracking-[0.16em]"
+            style={{ fontSize: "9px", color: "var(--text-disabled)" }}
+          >
+            Shade Score
+          </p>
+          <button
+            onClick={() => setShowExplainer((v) => !v)}
+            className="w-4 h-4 rounded-full flex items-center justify-center transition-all duration-150"
+            style={{
+              background: "rgba(148,163,184,0.10)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-muted)",
+              fontSize: "8px",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+            aria-label="What is shade cover?"
+          >
+            ?
+          </button>
+          <ShadeExplainerTooltip visible={showExplainer} onClose={() => setShowExplainer(false)} />
+        </div>
 
         {/* PRIMARY: display-size number — the visual anchor of this popup */}
         <div className="flex items-end gap-2 mb-2">
@@ -150,6 +184,37 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
                 : info.nearest_park
             }
           />
+        )}
+      </div>
+
+      {/* Divider */}
+      <div style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }} />
+      {/* Flag footer */}
+      <div className="px-4 py-2 flex items-center justify-between">
+        <button
+          onClick={handleFlag}
+          className="flex items-center gap-1.5 transition-all duration-150"
+          style={{
+            background: flagged ? "rgba(249,115,22,0.10)" : "transparent",
+            border: "none",
+            cursor: "pointer",
+            padding: "4px 8px",
+            borderRadius: "6px",
+            color: flagged ? "#F97316" : "var(--text-disabled)",
+            fontSize: "10px",
+          }}
+          aria-pressed={flagged}
+          title={flagged ? "Remove flag" : "Flag inaccurate shade data"}
+        >
+          <span>{flagged ? "🚩" : "🏳"}</span>
+          <span className="font-mono-ui uppercase tracking-[0.12em]" style={{ fontSize: "9px" }}>
+            {flagged ? "Flagged" : "Flag this data"}
+          </span>
+        </button>
+        {flagged && (
+          <span className="font-mono-ui uppercase tracking-[0.10em]" style={{ fontSize: "8px", color: "var(--text-disabled)" }}>
+            Tap again to remove
+          </span>
         )}
       </div>
     </div>

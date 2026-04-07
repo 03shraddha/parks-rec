@@ -5,12 +5,13 @@ import type { EventInfo } from "./Map";
 interface EventPopupProps {
   info: EventInfo;
   onClose: () => void;
+  onGetDirections?: (lng: number, lat: number) => void;
 }
 
 const PINK_GLOW = "rgba(244, 114, 182, 0.45)";
 const PINK_GRADIENT = "linear-gradient(135deg, #F472B6, #EC4899)";
 
-export default function EventPopup({ info, onClose }: EventPopupProps) {
+export default function EventPopup({ info, onClose, onGetDirections }: EventPopupProps) {
   const pinkGlow = PINK_GLOW;
   const pinkGradient = PINK_GRADIENT;
 
@@ -128,6 +129,34 @@ export default function EventPopup({ info, onClose }: EventPopupProps) {
             >
               Get Tickets →
             </a>
+          </div>
+        </>
+      )}
+      {info.lng !== undefined && info.lat !== undefined && onGetDirections && (
+        <>
+          <div style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }} />
+          <div className="px-4 py-3">
+            <button
+              onClick={() => {
+                onGetDirections(info.lng!, info.lat!);
+              }}
+              className="block w-full py-2.5 rounded-xl font-grotesk text-sm font-bold text-center transition-all duration-200"
+              style={{
+                background: "linear-gradient(135deg, #10B981, #059669)",
+                color: "#fff",
+                border: "1px solid rgba(52,211,153,0.40)",
+                boxShadow: "0 0 16px rgba(16,185,129,0.45), 0 4px 16px rgba(0,0,0,0.4)",
+                letterSpacing: "0.03em",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 28px rgba(16,185,129,0.55), 0 4px 24px rgba(0,0,0,0.5)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 16px rgba(16,185,129,0.45), 0 4px 16px rgba(0,0,0,0.4)";
+              }}
+            >
+              🌿 Get directions →
+            </button>
           </div>
         </>
       )}

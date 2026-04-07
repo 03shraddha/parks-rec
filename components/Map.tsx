@@ -28,6 +28,8 @@ import {
 export type Theme = "light" | "dark";
 import type { ScoredRoute, SegmentInfo } from "@/lib/shadeScoring";
 import type { Coordinate } from "@/lib/graphhopper";
+import type { ParkInfo } from "./ParkPanel";
+export type { ParkInfo };
 
 /** Properties returned by /api/events for each event feature */
 export interface EventInfo {
@@ -39,6 +41,8 @@ export interface EventInfo {
   ticket_url: string | null;
   thumbnail: string | null;
   category: string;
+  lng?: number;  // coordinate for "get directions" feature
+  lat?: number;
 }
 
 /** Properties of a clicked heatmap hexbin */
@@ -92,6 +96,7 @@ interface MapProps {
   onHeatmapClick?: (info: HeatmapInfo) => void;
   onTrailClick?: (info: TrailInfo) => void;
   onEventsLoaded?: (features: EventFeature[]) => void;
+  onParkClick?: (info: ParkInfo) => void;
   // React 19: ref is a regular prop, no forwardRef needed
   ref?: Ref<MapHandle>;
 }
@@ -110,6 +115,7 @@ export default function Map({
   onHeatmapClick,
   onTrailClick,
   onEventsLoaded,
+  onParkClick,
   ref,
 }: MapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -173,8 +179,31 @@ export default function Map({
         layers: [LAYER_IDS.events],
       });
       if (eventFeatures.length > 0) {
-        const props = eventFeatures[0].properties as EventInfo;
-        if (props) onEventClick(props);
+        const feature = eventFeatures[0];
+        const props = feature.properties as EventInfo;
+        const geom = feature.geometry as { type: string; coordinates?: [number, number] };
+        if (props) onEventClick({
+          ...props,
+          lng: geom.coordinates?.[0],
+          lat: geom.coordinates?.[1],
+        });
+        return;
+      }
+
+      // Check if a park polygon was clicked (only fires when parks layer is visible)
+      const parkFeatures = map.queryRenderedFeatures(e.point, {
+        layers: [LAYER_IDS.parksFill],
+      });
+      if (parkFeatures.length > 0) {
+        const props = parkFeatures[0].properties as { name?: string; type?: string };
+        if (onParkClick) {
+          onParkClick({
+            name: props?.name ?? "Unknown Park",
+            type: props?.type ?? "park",
+            lng: e.lngLat.lng,
+            lat: e.lngLat.lat,
+          });
+        }
         return;
       }
 
@@ -229,6 +258,14 @@ export default function Map({
       map.getCanvas().style.cursor = "pointer";
     });
     map.on("mouseleave", LAYER_IDS.events, () => {
+      map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
+    });
+
+    // Parks layer cursor
+    map.on("mouseenter", LAYER_IDS.parksFill, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", LAYER_IDS.parksFill, () => {
       map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
     });
 

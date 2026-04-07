@@ -11,7 +11,14 @@ import HeatmapLegend from "@/components/HeatmapLegend";
 import HeatmapPopup from "@/components/HeatmapPopup";
 import TrailPopup from "@/components/TrailPopup";
 import EventsPanel from "@/components/EventsPanel";
+import OnboardingOverlay from "@/components/OnboardingOverlay";
+import RouteComparisonBar from "@/components/RouteComparisonBar";
+import CoolSpotFinder from "@/components/CoolSpotFinder";
+import HeatAdvisory from "@/components/HeatAdvisory";
+import MobileLayerSheet from "@/components/MobileLayerSheet";
+import ParkPanel from "@/components/ParkPanel";
 import type { LayerVisibility, PinMode, Theme, MapHandle, EventInfo, HeatmapInfo, TrailInfo, EventFeature } from "@/components/Map";
+import type { ParkInfo } from "@/components/ParkPanel";
 import type { ScoredRoute, SegmentInfo } from "@/lib/shadeScoring";
 import { scoreRoute, pickRoutes } from "@/lib/shadeScoring";
 import type { Coordinate } from "@/lib/graphhopper";
@@ -76,6 +83,9 @@ export default function HomePage() {
   // ── Event popup ──────────────────────────────────────────────────────────
   const [eventInfo, setEventInfo] = useState<EventInfo | null>(null);
 
+  // ── Park popup ───────────────────────────────────────────────────────────
+  const [parkInfo, setParkInfo] = useState<ParkInfo | null>(null);
+
   // ── Heatmap popup ─────────────────────────────────────────────────────────
   const [heatmapInfo, setHeatmapInfo] = useState<HeatmapInfo | null>(null);
 
@@ -84,6 +94,15 @@ export default function HomePage() {
 
   // ── Events panel list ─────────────────────────────────────────────────────
   const [eventsList, setEventsList] = useState<EventFeature[]>([]);
+
+  // ── Onboarding ────────────────────────────────────────────────────────────
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    if (!localStorage.getItem("onboarding_done")) setShowOnboarding(true);
+  }, []);
+
+  // ── Heat advisory ─────────────────────────────────────────────────────────
+  const [showHeatAdvisory, setShowHeatAdvisory] = useState(true);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const fetchRoute = useCallback(
@@ -175,6 +194,7 @@ export default function HomePage() {
         onHeatmapClick={setHeatmapInfo}
         onTrailClick={setTrailInfo}
         onEventsLoaded={setEventsList}
+        onParkClick={setParkInfo}
       />
 
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
@@ -272,11 +292,19 @@ export default function HomePage() {
 
         {/* Layer controls + Surprise Me — bottom left */}
         <div className="w-full md:w-auto flex flex-col gap-2">
-          {visibleLayers.heat && <HeatmapLegend />}
-          <LayerControls visible={visibleLayers} onChange={toggleLayer} />
-          <SurpriseMe
-            onFlyTo={(lng, lat) => mapHandleRef.current?.flyTo(lng, lat)}
-          />
+          <MobileLayerSheet activeLayerCount={Object.values(visibleLayers).filter(Boolean).length}>
+            {visibleLayers.heat && <HeatmapLegend />}
+            <LayerControls visible={visibleLayers} onChange={toggleLayer} />
+            <SurpriseMe
+              onFlyTo={(lng, lat) => mapHandleRef.current?.flyTo(lng, lat)}
+            />
+            <CoolSpotFinder
+              onSelectDestination={(lng, lat) => {
+                setDestination({ lng, lat });
+                if (origin) fetchRoute(origin, { lng, lat });
+              }}
+            />
+          </MobileLayerSheet>
         </div>
 
         {/* Pin controls + route panel — bottom right */}
@@ -289,6 +317,7 @@ export default function HomePage() {
             onFetchRoute={fetchRoute}
             onPinDrop={handlePinDrop}
           />
+          <RouteComparisonBar fastRoute={fastRoute} coolRoute={coolRoute} />
           <RoutePanel
             fastRoute={fastRoute}
             coolRoute={coolRoute}
@@ -297,6 +326,13 @@ export default function HomePage() {
           />
         </div>
       </div>
+
+      {/* ── Heat advisory banner ──────────────────────────────────────────── */}
+      {showHeatAdvisory && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none px-4 w-full max-w-xs">
+          <HeatAdvisory onDismiss={() => setShowHeatAdvisory(false)} />
+        </div>
+      )}
 
       {/* ── Segment popup ─────────────────────────────────────────────────── */}
       {segmentInfo && (
@@ -308,7 +344,34 @@ export default function HomePage() {
       {/* ── Event popup ───────────────────────────────────────────────────── */}
       {eventInfo && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20">
-          <EventPopup info={eventInfo} onClose={() => setEventInfo(null)} />
+          <EventPopup
+            info={eventInfo}
+            onClose={() => setEventInfo(null)}
+            onGetDirections={(lng, lat) => {
+              setEventInfo(null);
+              setDestination({ lng, lat });
+              if (origin) {
+                fetchRoute(origin, { lng, lat });
+              } else {
+                setPinMode("origin");
+              }
+            }}
+          />
+        </div>
+      )}
+
+      {/* ── Park popup ────────────────────────────────────────────────────── */}
+      {parkInfo && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20">
+          <ParkPanel
+            info={parkInfo}
+            onClose={() => setParkInfo(null)}
+            onRouteHere={(lng, lat) => {
+              setParkInfo(null);
+              setDestination({ lng, lat });
+              if (origin) fetchRoute(origin, { lng, lat });
+            }}
+          />
         </div>
       )}
 
@@ -319,7 +382,7 @@ export default function HomePage() {
             events={eventsList}
             onEventSelect={(lng, lat, info) => {
               mapHandleRef.current?.flyTo(lng, lat, 15);
-              setEventInfo(info);
+              setEventInfo({ ...info, lng, lat });
             }}
             onClose={() => {
               setEventsList([]);
@@ -366,6 +429,9 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* ── First-run onboarding overlay ──────────────────────────────────── */}
+      {showOnboarding && <OnboardingOverlay onClose={() => setShowOnboarding(false)} />}
     </main>
   );
 }

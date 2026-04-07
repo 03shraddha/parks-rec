@@ -82,13 +82,19 @@ async function geocodeAddress(
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 export async function GET(): Promise<NextResponse> {
-  // Guard: require SerpApi key
   const serpApiKey = process.env.SERPAPI_KEY;
+
+  // No SerpApi key — serve the curated static events as a fallback
   if (!serpApiKey) {
-    return NextResponse.json(
-      { error: "SERPAPI_KEY not configured" },
-      { status: 500 }
-    );
+    try {
+      const { readFile } = await import("fs/promises");
+      const { join } = await import("path");
+      const filePath = join(process.cwd(), "public", "data", "events.geojson");
+      const content = await readFile(filePath, "utf-8");
+      return NextResponse.json(JSON.parse(content));
+    } catch {
+      return NextResponse.json({ type: "FeatureCollection", features: [] });
+    }
   }
 
   const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "";

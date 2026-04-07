@@ -4,9 +4,9 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Cubbon Park Morning Walk",
+        "title": "Sunday Morning Walk — Cubbon Park",
         "date": "Every Sunday",
-        "time": "6:00 AM",
+        "time": "6:00 AM – 8:00 AM",
         "venue": "Cubbon Park",
         "address": "Kasturba Road, Sampangi Rama Nagar, Bengaluru",
         "ticket_url": null,
@@ -18,100 +18,240 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Lalbagh Flower Show",
-        "date": "Republic Day Season",
-        "time": "9:00 AM – 8:00 PM",
+        "title": "Heritage Tree Walk — Lalbagh",
+        "date": "Every Saturday",
+        "time": "7:00 AM – 9:00 AM",
         "venue": "Lalbagh Botanical Garden",
-        "address": "Mavalli, Bengaluru",
+        "address": "Mavalli, Bengaluru 560004",
         "ticket_url": null,
         "thumbnail": null,
-        "category": "Cultural"
+        "category": "Nature"
       },
       "geometry": { "type": "Point", "coordinates": [77.5851, 12.9507] }
     },
     {
       "type": "Feature",
       "properties": {
-        "title": "Bangalore Bird Walk",
-        "date": "First Saturday of the month",
-        "time": "6:30 AM",
-        "venue": "Ulsoor Lake",
-        "address": "Ulsoor Lake, Bengaluru",
+        "title": "Urban Ecology Talk",
+        "date": "Saturday, April 12",
+        "time": "4:00 PM – 6:00 PM",
+        "venue": "Bangalore International Centre",
+        "address": "4, Dr Rajkumar Road, Rajajinagar, Bengaluru 560010",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5475, 12.9940] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Parallel Cinema Screening",
+        "date": "Friday, April 18",
+        "time": "6:30 PM – 9:00 PM",
+        "venue": "Bangalore International Centre",
+        "address": "4, Dr Rajkumar Road, Rajajinagar, Bengaluru 560010",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5475, 12.9940] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "French Cinema Week",
+        "date": "Saturday, April 19",
+        "time": "5:00 PM – 8:00 PM",
+        "venue": "Alliance Française de Bangalore",
+        "address": "Millers Road, Vasanth Nagar, Bengaluru 560052",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5931, 12.9862] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Language Exchange Meetup",
+        "date": "Every last Saturday",
+        "time": "11:00 AM – 1:00 PM",
+        "venue": "Alliance Française de Bangalore",
+        "address": "Millers Road, Vasanth Nagar, Bengaluru 560052",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5931, 12.9862] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Contemporary Art Exhibition Opening",
+        "date": "Saturday, April 12",
+        "time": "11:00 AM – 6:00 PM",
+        "venue": "National Gallery of Modern Art",
+        "address": "49, Palace Road, Bengaluru 560052",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5897, 12.9994] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Short Film Festival",
+        "date": "Saturday, April 26",
+        "time": "3:00 PM – 9:00 PM",
+        "venue": "Jagriti Theatre",
+        "address": "Aqueel Plaza, Whitefield Main Road, Bengaluru 560066",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.7498, 12.9783] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Metro Art Fair — Open Gallery Day",
+        "date": "Every Sunday",
+        "time": "10:00 AM – 8:00 PM",
+        "venue": "Rangoli Metro Art Center",
+        "address": "MG Road Metro Station, Bengaluru 560001",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6063, 12.9748] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Open Studio Saturday",
+        "date": "Every Saturday",
+        "time": "10:00 AM – 5:00 PM",
+        "venue": "Karnataka Chitrakala Parishath",
+        "address": "Kumara Krupa Road, Bengaluru 560001",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5880, 12.9960] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bird Walk — Bannerghatta",
+        "date": "Every Sunday",
+        "time": "6:30 AM – 9:00 AM",
+        "venue": "Bannerghatta Biological Park",
+        "address": "Bannerghatta Road, Bengaluru 560083",
         "ticket_url": null,
         "thumbnail": null,
         "category": "Nature"
       },
-      "geometry": { "type": "Point", "coordinates": [77.6233, 12.9820] }
+      "geometry": { "type": "Point", "coordinates": [77.5762, 12.8003] }
     },
     {
       "type": "Feature",
       "properties": {
-        "title": "Yoga in the Park",
-        "date": "Every Saturday",
-        "time": "7:00 AM",
-        "venue": "Sankey Tank",
-        "address": "Sankey Road, Bengaluru",
+        "title": "Weekend Yoga in the Park",
+        "date": "Every Saturday & Sunday",
+        "time": "7:00 AM – 8:30 AM",
+        "venue": "Cubbon Park — Band Stand Lawn",
+        "address": "Kasturba Road, Bengaluru 560001",
         "ticket_url": null,
         "thumbnail": null,
-        "category": "Wellness"
+        "category": "Fitness"
       },
-      "geometry": { "type": "Point", "coordinates": [77.5826, 13.0148] }
+      "geometry": { "type": "Point", "coordinates": [77.5938, 12.9790] }
     },
     {
       "type": "Feature",
       "properties": {
-        "title": "Heritage Walk – Pete Area",
-        "date": "Second Sunday of the month",
-        "time": "7:30 AM",
-        "venue": "Krishnarajendra Market",
-        "address": "KR Market, Bengaluru",
+        "title": "Carnatic Evening Concert",
+        "date": "Friday, April 25",
+        "time": "6:00 PM – 8:30 PM",
+        "venue": "Indian Institute of World Culture",
+        "address": "6/7, Bhawani Singh Road, Basavangudi, Bengaluru 560004",
         "ticket_url": null,
         "thumbnail": null,
-        "category": "Heritage"
+        "category": "Cultural"
       },
-      "geometry": { "type": "Point", "coordinates": [77.5750, 12.9640] }
+      "geometry": { "type": "Point", "coordinates": [77.5745, 12.9437] }
     },
     {
       "type": "Feature",
       "properties": {
-        "title": "Namma Bengaluru Run",
-        "date": "Last Sunday of the month",
-        "time": "6:00 AM",
-        "venue": "Kanteerava Stadium",
-        "address": "Kasturba Road, Bengaluru",
+        "title": "Environmental Awareness Walk",
+        "date": "Every Sunday",
+        "time": "7:00 AM – 9:00 AM",
+        "venue": "Freedom Park",
+        "address": "Prison Road, Sheshadripuram, Bengaluru 560001",
         "ticket_url": null,
         "thumbnail": null,
-        "category": "Running"
+        "category": "Nature"
       },
-      "geometry": { "type": "Point", "coordinates": [77.5944, 12.9695] }
+      "geometry": { "type": "Point", "coordinates": [77.5736, 12.9742] }
     },
     {
       "type": "Feature",
       "properties": {
-        "title": "Cycle to Work Day",
-        "date": "Every Wednesday",
-        "time": "7:00 AM",
-        "venue": "Town Hall",
-        "address": "Ambedkar Veedhi, Bengaluru",
+        "title": "Photography Walk — Lalbagh Morning",
+        "date": "Every first Sunday",
+        "time": "6:00 AM – 8:30 AM",
+        "venue": "Lalbagh Botanical Garden",
+        "address": "Mavalli, Bengaluru 560004",
         "ticket_url": null,
         "thumbnail": null,
-        "category": "Cycling"
+        "category": "Nature"
       },
-      "geometry": { "type": "Point", "coordinates": [77.5891, 12.9761] }
+      "geometry": { "type": "Point", "coordinates": [77.5843, 12.9512] }
     },
     {
       "type": "Feature",
       "properties": {
-        "title": "Hebbal Lake Cleanup Drive",
-        "date": "Third Sunday of the month",
-        "time": "7:00 AM",
-        "venue": "Hebbal Lake",
-        "address": "Hebbal, Bengaluru",
+        "title": "Watercolour Workshop",
+        "date": "Saturday, April 19",
+        "time": "10:00 AM – 1:00 PM",
+        "venue": "Karnataka Chitrakala Parishath",
+        "address": "Kumara Krupa Road, Bengaluru 560001",
         "ticket_url": null,
         "thumbnail": null,
-        "category": "Environment"
+        "category": "Cultural"
       },
-      "geometry": { "type": "Point", "coordinates": [77.5998, 13.0432] }
+      "geometry": { "type": "Point", "coordinates": [77.5880, 12.9960] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Stand-up Comedy Open Mic",
+        "date": "Friday, April 11",
+        "time": "7:30 PM – 10:00 PM",
+        "venue": "Jagriti Theatre",
+        "address": "Aqueel Plaza, Whitefield Main Road, Bengaluru 560066",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.7498, 12.9783] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "IISc Open Day — Campus Science Walk",
+        "date": "Saturday, April 26",
+        "time": "9:00 AM – 5:00 PM",
+        "venue": "Indian Institute of Science",
+        "address": "CV Raman Avenue, Mathikere, Bengaluru 560012",
+        "ticket_url": null,
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5673, 13.0213] }
     }
   ]
 }

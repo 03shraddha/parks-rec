@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import type { ScoredRoute } from "@/lib/shadeScoring";
 import { formatDuration, formatDistance } from "@/lib/shadeScoring";
+import ShadeExplainerTooltip from "./ShadeExplainerTooltip";
 
 interface RoutePanelProps {
   fastRoute: ScoredRoute | null;
@@ -131,6 +133,7 @@ function RouteCard({
   route: ScoredRoute;
   badge?: string;
 }) {
+  const [showExplainer, setShowExplainer] = useState(false);
   return (
     <div
       className="rounded-2xl overflow-hidden"
@@ -210,12 +213,27 @@ function RouteCard({
           border: `1px solid ${borderColor}`,
         }}
       >
-        <p
-          className="font-mono-ui uppercase tracking-[0.14em]"
-          style={{ fontSize: "9px", color: "var(--text-disabled)" }}
-        >
-          Shade cover
-        </p>
+        <div className="flex items-center gap-1.5 relative">
+          <p className="font-mono-ui uppercase tracking-[0.14em]" style={{ fontSize: "9px", color: "var(--text-disabled)" }}>
+            Shade cover
+          </p>
+          <button
+            onClick={() => setShowExplainer((v) => !v)}
+            className="w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-150"
+            style={{
+              background: "rgba(148,163,184,0.10)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-muted)",
+              fontSize: "7px",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+            aria-label="What is shade cover?"
+          >
+            ?
+          </button>
+          <ShadeExplainerTooltip visible={showExplainer} onClose={() => setShowExplainer(false)} />
+        </div>
         <span
           className="font-grotesk font-bold leading-none"
           style={{ fontSize: "1.75rem", color: statColor, textShadow: `0 0 12px ${glowColor}` }}
