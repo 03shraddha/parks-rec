@@ -46,15 +46,6 @@ const LAYERS: {
     tooltip: "Lakes and ponds — cooler microclimates nearby.",
   },
   {
-    key: "heat",
-    label: "Heat Map",
-    icon: "🌡",
-    color: "linear-gradient(135deg, #F97316, #DC2626)",
-    glow: "rgba(249, 115, 22, 0.50)",
-    border: "rgba(251, 146, 60, 0.60)",
-    tooltip: "Areas with fewer trees get dangerously hot midday. Click any zone for details.",
-  },
-  {
     key: "busStops",
     label: "Bus Stops",
     icon: "🚌",

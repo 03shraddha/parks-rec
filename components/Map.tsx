@@ -45,13 +45,6 @@ export interface EventInfo {
   lat?: number;
 }
 
-/** Properties of a clicked heatmap hexbin */
-export interface HeatmapInfo {
-  tree_count: number;
-  lng: number;
-  lat: number;
-}
-
 /** Properties of a clicked trail feature */
 export interface TrailInfo {
   name: string;
@@ -76,7 +69,6 @@ export interface LayerVisibility {
   trees: boolean;
   parks: boolean;
   lakes: boolean;
-  heat: boolean;
   busStops: boolean;
   trails: boolean;
   events: boolean;
@@ -90,10 +82,10 @@ interface MapProps {
   coolRoute: ScoredRoute | null;
   visibleLayers: LayerVisibility;
   theme: Theme;
+  eventsLocation?: string; // when set, re-fetches events for this location
   onPinDrop: (mode: "origin" | "destination", coord: Coordinate) => void;
   onSegmentClick: (info: SegmentInfo) => void;
   onEventClick: (info: EventInfo) => void;
-  onHeatmapClick?: (info: HeatmapInfo) => void;
   onTrailClick?: (info: TrailInfo) => void;
   onEventsLoaded?: (features: EventFeature[]) => void;
   onParkClick?: (info: ParkInfo) => void;
@@ -109,10 +101,10 @@ export default function Map({
   coolRoute,
   visibleLayers,
   theme,
+  eventsLocation,
   onPinDrop,
   onSegmentClick,
   onEventClick,
-  onHeatmapClick,
   onTrailClick,
   onEventsLoaded,
   onParkClick,
@@ -217,18 +209,6 @@ export default function Map({
         return;
       }
 
-      // Check if a heatmap hexbin was clicked
-      const heatFeatures = map.queryRenderedFeatures(e.point, {
-        layers: [LAYER_IDS.heatRaster],
-      });
-      if (heatFeatures.length > 0) {
-        const props = heatFeatures[0].properties as { tree_count: number };
-        if (props && onHeatmapClick) {
-          onHeatmapClick({ tree_count: props.tree_count ?? 0, lng: e.lngLat.lng, lat: e.lngLat.lat });
-        }
-        return;
-      }
-
       // Check if a route line was clicked
       const features = map.queryRenderedFeatures(e.point, {
         layers: [LAYER_IDS.routeCool, LAYER_IDS.routeFast],
@@ -277,14 +257,6 @@ export default function Map({
       map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
     });
 
-    // Heatmap cursor
-    map.on("mouseenter", LAYER_IDS.heatRaster, () => {
-      map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", LAYER_IDS.heatRaster, () => {
-      map.getCanvas().style.cursor = pinModeRef.current ? "crosshair" : "";
-    });
-
     mapRef.current = map;
     return () => {
       map.remove();
@@ -314,7 +286,6 @@ export default function Map({
       setLayerVisibility(map, LAYER_IDS.parksStroke, vis.parks);
       setLayerVisibility(map, LAYER_IDS.lakesFill, vis.lakes);
       setLayerVisibility(map, LAYER_IDS.lakesStroke, vis.lakes);
-      setLayerVisibility(map, LAYER_IDS.heatRaster, vis.heat);
       setLayerVisibility(map, LAYER_IDS.busStops, vis.busStops);
       setLayerVisibility(map, LAYER_IDS.trails, vis.trails);
       setLayerVisibility(map, LAYER_IDS.events, vis.events);
@@ -369,7 +340,6 @@ export default function Map({
     setLayerVisibility(map, LAYER_IDS.parksStroke, visibleLayers.parks);
     setLayerVisibility(map, LAYER_IDS.lakesFill, visibleLayers.lakes);
     setLayerVisibility(map, LAYER_IDS.lakesStroke, visibleLayers.lakes);
-    setLayerVisibility(map, LAYER_IDS.heatRaster, visibleLayers.heat);
     setLayerVisibility(map, LAYER_IDS.busStops, visibleLayers.busStops);
     setLayerVisibility(map, LAYER_IDS.trails, visibleLayers.trails);
     setLayerVisibility(map, LAYER_IDS.events, visibleLayers.events);
@@ -392,7 +362,7 @@ export default function Map({
   }, [visibleLayers.trails]);
 
   // ── Events data fetch ─────────────────────────────────────────────────────
-  // Fetch /api/events when the events layer is turned on; clear when turned off.
+  // Fetches /api/events when the events layer is on. Re-fetches when eventsLocation changes.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
@@ -401,9 +371,11 @@ export default function Map({
     if (!source) return;
 
     if (visibleLayers.events) {
+      setEventsError(false);
       // On GitHub Pages (static export) the API route is removed; fall back to static GeoJSON.
       const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-      const eventsUrl = basePath ? `${basePath}/data/events.geojson` : "/api/events";
+      const locationParam = eventsLocation ? `?location=${encodeURIComponent(eventsLocation)}` : "";
+      const eventsUrl = basePath ? `${basePath}/data/events.geojson` : `/api/events${locationParam}`;
       fetch(eventsUrl)
         .then((res) => {
           if (!res.ok) throw new Error(`Events API returned ${res.status}`);
@@ -423,7 +395,8 @@ export default function Map({
     } else {
       source.setData({ type: "FeatureCollection", features: [] });
     }
-  }, [visibleLayers.events]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleLayers.events, eventsLocation]);
 
   return (
     <div className="absolute inset-0 w-full h-full">
@@ -488,27 +461,6 @@ function addDataSources(map: maplibregl.Map) {
 }
 
 function addDataLayers(map: maplibregl.Map) {
-  // Heat layer — urban heat islands derived from tree density (sparse trees = hotter).
-  // Uses the existing tree-density hexbins with an inverted colour scale so areas
-  // lacking canopy show as orange/red. No external raster tiles needed.
-  map.addLayer({
-    id: LAYER_IDS.heatRaster,
-    type: "fill",
-    source: SOURCE_IDS.trees,
-    paint: {
-      "fill-color": [
-        "interpolate", ["linear"],
-        ["get", "tree_count"],
-        0,   "#FF4500", // scorching — no tree cover
-        50,  "#FF8C00", // hot
-        150, "#FFD700", // warm
-        300, "#90EE90", // cool — dense canopy
-      ],
-      "fill-opacity": 0.55,
-    },
-    layout: { visibility: "none" },
-  });
-
   // Lakes
   map.addLayer({
     id: LAYER_IDS.lakesFill,

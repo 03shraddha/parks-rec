@@ -71,7 +71,6 @@ export const COLORS = {
 
 /** Layer IDs used throughout the app */
 export const LAYER_IDS = {
-  heatRaster:      "heat-raster",
   lakesFill:       "lakes-fill",
   lakesStroke:     "lakes-stroke",
   parksFill:       "parks-fill",
@@ -91,7 +90,6 @@ export const LAYER_IDS = {
 
 /** Source IDs */
 export const SOURCE_IDS = {
-  heat:      "heat-source",
   lakes:     "lakes",
   parks:     "parks",
   trees:     "trees",

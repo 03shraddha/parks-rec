@@ -2,22 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { useState, useCallback, useRef, useEffect } from "react";
-import LayerControls from "@/components/LayerControls";
-import SurpriseMe from "@/components/SurpriseMe";
-import RoutePanel from "@/components/RoutePanel";
 import SegmentPopup from "@/components/SegmentPopup";
 import EventPopup from "@/components/EventPopup";
-import HeatmapLegend from "@/components/HeatmapLegend";
-import HeatmapPopup from "@/components/HeatmapPopup";
 import TrailPopup from "@/components/TrailPopup";
 import EventsPanel from "@/components/EventsPanel";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
-import RouteComparisonBar from "@/components/RouteComparisonBar";
-import CoolSpotFinder from "@/components/CoolSpotFinder";
-import HeatAdvisory from "@/components/HeatAdvisory";
-import MobileLayerSheet from "@/components/MobileLayerSheet";
 import ParkPanel from "@/components/ParkPanel";
-import type { LayerVisibility, PinMode, Theme, MapHandle, EventInfo, HeatmapInfo, TrailInfo, EventFeature } from "@/components/Map";
+import type { LayerVisibility, PinMode, Theme, MapHandle, EventInfo, TrailInfo, EventFeature } from "@/components/Map";
 import type { ParkInfo } from "@/components/ParkPanel";
 import type { ScoredRoute, SegmentInfo } from "@/lib/shadeScoring";
 import { scoreRoute, pickRoutes } from "@/lib/shadeScoring";
@@ -55,17 +46,21 @@ export default function HomePage() {
     });
   }, []);
 
+  // ── UI mode: idle = layer pills + search bar, planning = From/To inputs ────
+  const [uiMode, setUiMode] = useState<"idle" | "planning">("idle");
+
   // ── Map interaction state ────────────────────────────────────────────────
   const [pinMode, setPinMode] = useState<PinMode>(null);
   const [origin, setOrigin] = useState<Coordinate | null>(null);
   const [destination, setDestination] = useState<Coordinate | null>(null);
+  const [originLabel, setOriginLabel] = useState("");
+  const [destLabel, setDestLabel] = useState("");
 
   // ── Layer visibility ─────────────────────────────────────────────────────
   const [visibleLayers, setVisibleLayers] = useState<LayerVisibility>({
     trees: false,
     parks: false,
     lakes: false,
-    heat: false,
     busStops: false,
     trails: false,
     events: false,
@@ -86,23 +81,18 @@ export default function HomePage() {
   // ── Park popup ───────────────────────────────────────────────────────────
   const [parkInfo, setParkInfo] = useState<ParkInfo | null>(null);
 
-  // ── Heatmap popup ─────────────────────────────────────────────────────────
-  const [heatmapInfo, setHeatmapInfo] = useState<HeatmapInfo | null>(null);
-
   // ── Trail popup ───────────────────────────────────────────────────────────
   const [trailInfo, setTrailInfo] = useState<TrailInfo | null>(null);
 
   // ── Events panel list ─────────────────────────────────────────────────────
   const [eventsList, setEventsList] = useState<EventFeature[]>([]);
+  const [eventsLocation, setEventsLocation] = useState<string | undefined>(undefined);
 
   // ── Onboarding ────────────────────────────────────────────────────────────
   const [showOnboarding, setShowOnboarding] = useState(false);
   useEffect(() => {
     if (!localStorage.getItem("onboarding_done")) setShowOnboarding(true);
   }, []);
-
-  // ── Heat advisory ─────────────────────────────────────────────────────────
-  const [showHeatAdvisory, setShowHeatAdvisory] = useState(true);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const fetchRoute = useCallback(
@@ -135,7 +125,7 @@ export default function HomePage() {
   );
 
   const handlePinDrop = useCallback(
-    async (mode: "origin" | "destination", coord: Coordinate) => {
+    async (mode: "origin" | "destination", coord: Coordinate, label?: string) => {
       setPinMode(null);
 
       let nextOrigin = origin;
@@ -143,9 +133,11 @@ export default function HomePage() {
 
       if (mode === "origin") {
         setOrigin(coord);
+        setOriginLabel(label ?? `${coord.lat.toFixed(4)}, ${coord.lng.toFixed(4)}`);
         nextOrigin = coord;
       } else {
         setDestination(coord);
+        setDestLabel(label ?? `${coord.lat.toFixed(4)}, ${coord.lng.toFixed(4)}`);
         nextDest = coord;
       }
 
@@ -168,11 +160,14 @@ export default function HomePage() {
   const handleReset = useCallback(() => {
     setOrigin(null);
     setDestination(null);
+    setOriginLabel("");
+    setDestLabel("");
     setFastRoute(null);
     setCoolRoute(null);
     setRouteError(null);
     setSegmentInfo(null);
     setPinMode(null);
+    setUiMode("idle");
   }, []);
 
   // ── UI ───────────────────────────────────────────────────────────────────
@@ -188,10 +183,10 @@ export default function HomePage() {
         coolRoute={coolRoute}
         visibleLayers={visibleLayers}
         theme={theme}
+        eventsLocation={eventsLocation}
         onPinDrop={handlePinDrop}
         onSegmentClick={setSegmentInfo}
         onEventClick={setEventInfo}
-        onHeatmapClick={setHeatmapInfo}
         onTrailClick={setTrailInfo}
         onEventsLoaded={setEventsList}
         onParkClick={setParkInfo}
@@ -287,52 +282,27 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ── Bottom layout ─────────────────────────────────────────────────── */}
-      <div className="absolute bottom-0 left-0 right-0 flex flex-col md:flex-row items-end justify-between p-4 gap-3 pointer-events-none z-10">
-
-        {/* Layer controls + Surprise Me — bottom left */}
-        <div className="w-full md:w-auto flex flex-col gap-2">
-          <MobileLayerSheet activeLayerCount={Object.values(visibleLayers).filter(Boolean).length}>
-            {visibleLayers.heat && <HeatmapLegend />}
-            <LayerControls visible={visibleLayers} onChange={toggleLayer} />
-            <SurpriseMe
-              onFlyTo={(lng, lat) => mapHandleRef.current?.flyTo(lng, lat)}
-            />
-            <CoolSpotFinder
-              onSelectDestination={(lng, lat) => {
-                setDestination({ lng, lat });
-                if (origin) fetchRoute(origin, { lng, lat });
-              }}
-            />
-          </MobileLayerSheet>
-        </div>
-
-        {/* Pin controls + route panel — bottom right */}
-        <div className="w-full md:w-72 flex flex-col gap-3">
-          <PinControls
-            origin={origin}
-            destination={destination}
-            pinMode={pinMode}
-            onSetMode={setPinMode}
-            onFetchRoute={fetchRoute}
-            onPinDrop={handlePinDrop}
-          />
-          <RouteComparisonBar fastRoute={fastRoute} coolRoute={coolRoute} />
-          <RoutePanel
-            fastRoute={fastRoute}
-            coolRoute={coolRoute}
-            loading={routeLoading}
-            error={routeError}
-          />
-        </div>
+      {/* ── Bottom sheet ──────────────────────────────────────────────────── */}
+      <div className="absolute bottom-0 left-0 right-0 z-10">
+        <BottomSheet
+          uiMode={uiMode}
+          origin={origin}
+          destination={destination}
+          originLabel={originLabel}
+          destLabel={destLabel}
+          visibleLayers={visibleLayers}
+          fastRoute={fastRoute}
+          coolRoute={coolRoute}
+          routeLoading={routeLoading}
+          routeError={routeError}
+          onEnterPlanning={() => setUiMode("planning")}
+          onBack={handleReset}
+          onToggleLayer={toggleLayer}
+          onPinDrop={handlePinDrop}
+          onFetchRoute={fetchRoute}
+          onSetPinMode={setPinMode}
+        />
       </div>
-
-      {/* ── Heat advisory banner ──────────────────────────────────────────── */}
-      {showHeatAdvisory && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none px-4 w-full max-w-xs">
-          <HeatAdvisory onDismiss={() => setShowHeatAdvisory(false)} />
-        </div>
-      )}
 
       {/* ── Segment popup ─────────────────────────────────────────────────── */}
       {segmentInfo && (
@@ -388,14 +358,11 @@ export default function HomePage() {
               setEventsList([]);
               toggleLayer("events");
             }}
+            onLocationSearch={(location) => {
+              setEventsLocation(location);
+              setEventsList([]); // clear while re-fetching
+            }}
           />
-        </div>
-      )}
-
-      {/* ── Heatmap popup ─────────────────────────────────────────────────── */}
-      {heatmapInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-40 md:left-4 md:translate-x-0 z-20">
-          <HeatmapPopup info={heatmapInfo} onClose={() => setHeatmapInfo(null)} />
         </div>
       )}
 
@@ -406,10 +373,10 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Pin-drop instruction banner ───────────────────────────────────── */}
+      {/* ── Pin-drop instruction banner (shown when tapping map) ────────── */}
       {pinMode && (
         <div
-          className="absolute top-20 left-1/2 pointer-events-none z-20"
+          className="absolute top-20 left-1/2 -translate-x-1/2 pointer-events-none z-20"
           style={{ animation: "banner-float 2.4s ease-in-out infinite" }}
         >
           <div
@@ -420,12 +387,9 @@ export default function HomePage() {
               border: "1px solid rgba(167, 139, 250, 0.4)",
               color: "#fff",
               boxShadow: "0 0 20px var(--violet-glow), 0 8px 32px rgba(0,0,0,0.5)",
-              letterSpacing: "0.02em",
             }}
           >
-            {pinMode === "origin"
-              ? "✦ Tap the map to set your start"
-              : "✦ Tap the map to set your destination"}
+            {pinMode === "origin" ? "✦ Tap map to set start" : "✦ Tap map to set destination"}
           </div>
         </div>
       )}
@@ -442,271 +406,412 @@ interface GeoFeature {
   center: [number, number]; // [lng, lat]
 }
 
-// ── Pin Controls Component ─────────────────────────────────────────────────
-function PinControls({
+// ── Layer pill config (used in BottomSheet idle mode) ──────────────────────
+const LAYER_PILLS: {
+  key: keyof LayerVisibility;
+  icon: string;
+  label: string;
+  color: string;
+  glow: string;
+  border: string;
+}[] = [
+  { key: "trees",    icon: "🌳", label: "Trees",    color: "linear-gradient(135deg,#10B981,#059669)", glow: "rgba(16,185,129,.5)",  border: "rgba(52,211,153,.6)" },
+  { key: "parks",    icon: "🏞", label: "Parks",    color: "linear-gradient(135deg,#34D399,#10B981)", glow: "rgba(52,211,153,.5)",  border: "rgba(52,211,153,.6)" },
+  { key: "lakes",    icon: "💧", label: "Water",    color: "linear-gradient(135deg,#06B6D4,#0284C7)", glow: "rgba(6,182,212,.5)",   border: "rgba(103,232,249,.6)" },
+  { key: "busStops", icon: "🚌", label: "Buses",    color: "linear-gradient(135deg,#A78BFA,#7C3AED)", glow: "rgba(124,58,237,.5)",  border: "rgba(167,139,250,.6)" },
+  { key: "trails",   icon: "🥾", label: "Trails",   color: "linear-gradient(135deg,#86EFAC,#22C55E)", glow: "rgba(134,239,172,.5)", border: "rgba(134,239,172,.6)" },
+  { key: "events",   icon: "🎉", label: "Events",   color: "linear-gradient(135deg,#F472B6,#EC4899)", glow: "rgba(244,114,182,.5)", border: "rgba(249,168,212,.6)" },
+];
+
+// ── Shared geocode search helper ───────────────────────────────────────────
+async function geocodeQuery(value: string): Promise<GeoFeature[]> {
+  const mappslKey = process.env.NEXT_PUBLIC_MAPPLS_KEY ?? "";
+  if (mappslKey) {
+    const encoded = encodeURIComponent(value.trim() + " Bengaluru");
+    const res = await fetch(
+      `https://atlas.mapmyindia.com/api/places/geocode?address=${encoded}&access_token=${mappslKey}`
+    );
+    const data = await res.json();
+    return (data.copResults ?? []).slice(0, 5).map(
+      (r: { formatted_address: string; latitude: string; longitude: string }) => ({
+        place_name: r.formatted_address,
+        center: [parseFloat(r.longitude), parseFloat(r.latitude)] as [number, number],
+      })
+    );
+  }
+  // Nominatim fallback — free, full Indian POI coverage
+  const q = encodeURIComponent(value.trim());
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=5&countrycodes=in&bounded=1&viewbox=77.30,13.15,77.85,12.70&addressdetails=1`,
+    { headers: { "User-Agent": "WalkTheCityBengaluru/1.0" } }
+  );
+  const data = await res.json();
+  return data.map((r: { display_name: string; lon: string; lat: string }) => ({
+    place_name: r.display_name,
+    center: [parseFloat(r.lon), parseFloat(r.lat)] as [number, number],
+  }));
+}
+
+// ── Bottom Sheet ───────────────────────────────────────────────────────────
+// Two modes: "idle" (layer pills + search bar) and "planning" (From/To + routes).
+function BottomSheet({
+  uiMode,
   origin,
   destination,
-  pinMode,
-  onSetMode,
-  onFetchRoute,
+  originLabel,
+  destLabel,
+  visibleLayers,
+  fastRoute,
+  coolRoute,
+  routeLoading,
+  routeError,
+  onEnterPlanning,
+  onBack,
+  onToggleLayer,
   onPinDrop,
+  onFetchRoute,
+  onSetPinMode,
 }: {
+  uiMode: "idle" | "planning";
   origin: Coordinate | null;
   destination: Coordinate | null;
-  pinMode: PinMode;
-  onSetMode: (m: PinMode) => void;
+  originLabel: string;
+  destLabel: string;
+  visibleLayers: LayerVisibility;
+  fastRoute: ScoredRoute | null;
+  coolRoute: ScoredRoute | null;
+  routeLoading: boolean;
+  routeError: string | null;
+  onEnterPlanning: () => void;
+  onBack: () => void;
+  onToggleLayer: (key: keyof LayerVisibility) => void;
+  onPinDrop: (mode: "origin" | "destination", coord: Coordinate, label?: string) => void;
   onFetchRoute: (o: Coordinate, d: Coordinate) => void;
-  onPinDrop: (mode: "origin" | "destination", coord: Coordinate) => void;
+  onSetPinMode: (m: PinMode) => void;
 }) {
-  const [query, setQuery] = useState("");
+  const [activeInput, setActiveInput] = useState<"origin" | "destination" | null>(null);
+  const [originQuery, setOriginQuery] = useState(originLabel);
+  const [destQuery, setDestQuery] = useState(destLabel);
   const [suggestions, setSuggestions] = useState<GeoFeature[]>([]);
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const originInputRef = useRef<HTMLInputElement>(null);
+  const destInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus the input when a pin mode becomes active
+  // Sync display text when parent sets labels (e.g. map tap or GPS)
+  useEffect(() => { setOriginQuery(originLabel); }, [originLabel]);
+  useEffect(() => { setDestQuery(destLabel); }, [destLabel]);
+
+  // Auto-focus "From" input when entering planning mode
   useEffect(() => {
-    if (pinMode) {
-      setQuery("");
-      setSuggestions([]);
-      setGeoError(null);
-      setTimeout(() => inputRef.current?.focus(), 50);
+    if (uiMode === "planning" && !origin) {
+      setActiveInput("origin");
+      setTimeout(() => originInputRef.current?.focus(), 80);
     }
-  }, [pinMode]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiMode]);
 
-  // Debounced geocoding search via MapTiler
-  const handleQueryChange = (value: string) => {
-    setQuery(value);
+  const handleSearch = (value: string) => {
     setSuggestions([]);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (value.trim().length < 2) return;
-
     debounceRef.current = setTimeout(async () => {
-      try {
-        const key = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "";
-        const encoded = encodeURIComponent(value.trim());
-        // Restrict results to Bangalore bounding box + India only
-        const url = `https://api.maptiler.com/geocoding/${encoded}.json?key=${key}&proximity=77.5946,12.9716&bbox=77.30,12.70,77.85,13.15&country=IN&language=en&limit=5`;
-        const res = await fetch(url);
-        const data = await res.json();
-        setSuggestions(data.features ?? []);
-      } catch {
-        // silently ignore network errors on geocoding
-      }
+      try { setSuggestions(await geocodeQuery(value)); } catch { /* silently ignore */ }
     }, 350);
   };
 
-  const handleSelectSuggestion = (feature: GeoFeature) => {
-    if (!pinMode) return;
-    const [lng, lat] = feature.center;
-    onPinDrop(pinMode, { lng, lat });
-    setQuery("");
-    setSuggestions([]);
+  const handleSelectSuggestion = (f: GeoFeature) => {
+    if (!activeInput) return;
+    const [lng, lat] = f.center;
+    const shortName = f.place_name.split(",")[0].trim();
+    onPinDrop(activeInput, { lng, lat }, f.place_name);
+    if (activeInput === "origin") {
+      setOriginQuery(shortName);
+      setSuggestions([]);
+      setActiveInput("destination");
+      setTimeout(() => destInputRef.current?.focus(), 50);
+    } else {
+      setDestQuery(shortName);
+      setSuggestions([]);
+      setActiveInput(null);
+    }
   };
 
-  const handleGPS = () => {
-    if (!pinMode || !navigator.geolocation) return;
+  const handleGPS = (mode: "origin" | "destination") => {
+    if (!navigator.geolocation) return;
     setGeoLoading(true);
     setGeoError(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        onPinDrop(pinMode, { lng: pos.coords.longitude, lat: pos.coords.latitude });
+        const coord = { lng: pos.coords.longitude, lat: pos.coords.latitude };
+        onPinDrop(mode, coord, "Current location");
+        if (mode === "origin") {
+          setOriginQuery("Current location");
+          setActiveInput("destination");
+          setTimeout(() => destInputRef.current?.focus(), 50);
+        } else {
+          setDestQuery("Current location");
+          setActiveInput(null);
+        }
         setGeoLoading(false);
       },
-      () => {
-        setGeoError("Could not get your location.");
-        setGeoLoading(false);
-      },
+      () => { setGeoError("Could not get your location."); setGeoLoading(false); },
       { timeout: 8000 }
     );
   };
 
-  const pinColor = (mode: "origin" | "destination") =>
-    mode === "origin"
-      ? { active: "linear-gradient(135deg, var(--jade), #059669)", glow: "var(--jade-glow)", border: "var(--border-jade)", setColor: "rgba(4,120,87,0.12)", textColor: "var(--jade-light)" }
-      : { active: "linear-gradient(135deg, var(--amber), #D97706)", glow: "var(--amber-glow)", border: "var(--border-amber)", setColor: "rgba(180,83,9,0.12)", textColor: "var(--amber-light)" };
-
-  const renderPinBtn = (mode: "origin" | "destination", coord: Coordinate | null) => {
-    const label = mode === "origin" ? "A" : "B";
-    const isActive = pinMode === mode;
-    const isSet = !!coord;
-    const c = pinColor(mode);
+  // ── Idle mode ────────────────────────────────────────────────────────────
+  if (uiMode === "idle") {
     return (
-      <button
-        key={mode}
-        onClick={() => onSetMode(isActive ? null : mode)}
-        className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200"
-        style={
-          isActive
-            ? { background: c.active, border: `1px solid transparent`, color: "#fff", boxShadow: `0 0 14px ${c.glow}` }
-            : isSet
-            ? { background: c.setColor, border: `1px solid ${c.border}`, color: c.textColor }
-            : { background: "var(--border-subtle)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }
-        }
-      >
-        <span
-          className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+      <div className="pointer-events-none px-3 pb-4">
+        <div
+          className="pointer-events-auto rounded-3xl overflow-hidden"
           style={{
-            background: isSet || isActive ? c.active : "var(--text-muted)",
-            boxShadow: isSet || isActive ? `0 0 8px ${c.glow}` : "none",
+            background: "var(--bg-card)",
+            backdropFilter: "blur(20px) saturate(180%)",
+            border: "1px solid var(--border-subtle)",
+            boxShadow: "0 -4px 32px rgba(0,0,0,0.18)",
           }}
         >
-          {label}
-        </span>
-        {isSet ? (mode === "origin" ? "Start set" : "End set") : (mode === "origin" ? "Set start" : "Set end")}
-      </button>
-    );
-  };
+          {/* Layer pills — horizontal scroll, no scrollbar */}
+          <div className="flex gap-2 px-3 pt-3 pb-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+            {LAYER_PILLS.map(({ key, icon, label, color, glow, border }) => {
+              const on = visibleLayers[key];
+              return (
+                <button
+                  key={key}
+                  onClick={() => onToggleLayer(key)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0"
+                  style={
+                    on
+                      ? { background: color, border: `1px solid ${border}`, color: "#fff", boxShadow: `0 0 10px ${glow}` }
+                      : { background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }
+                  }
+                >
+                  <span className="text-sm leading-none">{icon}</span>
+                  <span className="font-grotesk">{label}</span>
+                </button>
+              );
+            })}
+          </div>
 
-  const activeColor = pinMode ? pinColor(pinMode) : null;
-
-  return (
-    <div className="pointer-events-auto anime-panel glow-violet rounded-2xl p-3 flex flex-col gap-2.5">
-      {/* Label — TERTIARY: Space Mono ALL CAPS, pushed to edge of importance */}
-      <p className="font-mono-ui text-[10px] uppercase tracking-[0.15em]" style={{ color: "var(--text-disabled)" }}>
-        ✦ Set your route
-      </p>
-
-      {/* Pin buttons */}
-      <div className="flex gap-2">
-        {renderPinBtn("origin", origin)}
-        {renderPinBtn("destination", destination)}
-      </div>
-
-      {/* Expanded search panel — shown when a pin mode is active */}
-      {pinMode && activeColor && (
-        <div className="flex flex-col gap-2" style={{ animation: "slide-up 0.2s ease-out" }}>
           {/* Divider */}
-          <div style={{ borderTop: "1px solid var(--border-subtle)" }} />
+          <div style={{ height: "1px", background: "var(--border-subtle)", margin: "0 12px" }} />
 
-          {/* Search input */}
-          <div className="relative">
+          {/* Search bar CTA */}
+          <button
+            onClick={onEnterPlanning}
+            className="flex items-center gap-3 px-4 py-3.5 w-full text-left"
+          >
             <div
-              className="flex items-center gap-2 px-3 py-2 rounded-xl"
-              style={{
-                background: "var(--bg-surface)",
-                border: `1px solid ${activeColor.border}`,
-                boxShadow: `0 0 8px ${activeColor.glow}`,
-              }}
+              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+              style={{ background: "linear-gradient(135deg,var(--jade),var(--cyan))", boxShadow: "0 0 10px var(--jade-glow)" }}
             >
-              {/* Search icon */}
-              <svg className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} style={{ color: "#fff" }}>
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={(e) => handleQueryChange(e.target.value)}
-                placeholder={pinMode === "origin" ? "Search start address…" : "Search destination…"}
-                className="flex-1 bg-transparent text-xs outline-none min-w-0"
-                style={{ color: "var(--text-primary)" }}
-              />
-              {query && (
-                <button onClick={() => { setQuery(""); setSuggestions([]); }} style={{ color: "var(--text-muted)" }}>
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M18 6 6 18M6 6l12 12" /></svg>
-                </button>
-              )}
             </div>
+            <span className="font-grotesk font-semibold text-sm" style={{ color: "var(--text-secondary)" }}>
+              Where do you want to walk?
+            </span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-            {/* Suggestions dropdown */}
-            {suggestions.length > 0 && (
-              <div
-                className="absolute bottom-full left-0 right-0 mb-1 rounded-xl overflow-hidden z-30"
-                style={{
-                  background: "var(--bg-surface)",
-                  border: `1px solid ${activeColor.border}`,
-                  boxShadow: `0 0 16px ${activeColor.glow}, 0 8px 24px rgba(0,0,0,0.15)`,
-                  animation: "slide-up 0.15s ease-out",
-                }}
+  // ── Planning mode ────────────────────────────────────────────────────────
+  const hasRoute = !!(coolRoute || fastRoute);
+
+  return (
+    <div className="pointer-events-none px-3 pb-4">
+      <div
+        className="pointer-events-auto rounded-3xl overflow-hidden flex flex-col"
+        style={{
+          background: "var(--bg-card)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          border: "1px solid var(--border-subtle)",
+          boxShadow: "0 -4px 32px rgba(0,0,0,0.18)",
+          animation: "slide-up 0.25s cubic-bezier(0.16,1,0.3,1)",
+        }}
+      >
+        {/* Header row: back + title */}
+        <div className="flex items-center gap-2.5 px-3 pt-3 pb-1">
+          <button
+            onClick={onBack}
+            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 font-grotesk text-sm"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
+          >
+            ←
+          </button>
+          <span className="font-grotesk font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+            Plan your walk
+          </span>
+        </div>
+
+        {/* From / To inputs */}
+        <div className="px-3 pt-1 pb-1 flex flex-col">
+          {/* ── A: From ── */}
+          <div className="flex items-center gap-2.5 py-2.5" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+              style={{ background: "linear-gradient(135deg,var(--jade),#059669)", boxShadow: "0 0 8px var(--jade-glow)" }}
+            >A</div>
+            <input
+              ref={originInputRef}
+              type="text"
+              value={originQuery}
+              onChange={(e) => { setOriginQuery(e.target.value); handleSearch(e.target.value); }}
+              onFocus={() => { setActiveInput("origin"); setSuggestions([]); }}
+              placeholder="From — your start point"
+              className="flex-1 bg-transparent text-sm outline-none min-w-0 font-grotesk"
+              style={{ color: "var(--text-primary)" }}
+            />
+            {activeInput === "origin" && (
+              <button
+                onClick={() => handleGPS("origin")}
+                disabled={geoLoading}
+                className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all"
+                style={{ background: "rgba(16,185,129,0.12)", border: "1px solid var(--border-jade)", color: "var(--jade-light)" }}
+                title="Use current location"
               >
-                {suggestions.map((f, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSelectSuggestion(f)}
-                    className="w-full text-left px-3 py-2.5 flex items-start gap-2 transition-colors duration-100"
-                    style={{ borderBottom: i < suggestions.length - 1 ? "1px solid var(--border-subtle)" : "none" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-deep)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                  >
-                    <svg className="w-3 h-3 mt-0.5 shrink-0" style={{ color: activeColor.textColor }} fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                    </svg>
-                    <span className="text-xs leading-snug" style={{ color: "var(--text-primary)" }}>
-                      {f.place_name}
-                    </span>
-                  </button>
-                ))}
-              </div>
+                {geoLoading
+                  ? <span className="w-3 h-3 rounded-full border-2 border-current border-t-transparent" style={{ animation: "spin 0.8s linear infinite", display: "inline-block" }} />
+                  : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><circle cx="12" cy="12" r="3" /><path d="M12 2v3m0 14v3M2 12h3m14 0h3" /></svg>
+                }
+              </button>
+            )}
+            {/* Tap-map button for origin */}
+            {activeInput === "origin" && (
+              <button
+                onClick={() => onSetPinMode("origin")}
+                className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(16,185,129,0.12)", border: "1px solid var(--border-jade)", color: "var(--jade-light)", fontSize: "12px" }}
+                title="Tap on map"
+              >📍</button>
             )}
           </div>
 
-          {/* GPS button */}
-          <button
-            onClick={handleGPS}
-            disabled={geoLoading}
-            className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-semibold transition-all duration-200"
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text-secondary)",
-              opacity: geoLoading ? 0.6 : 1,
-            }}
-            onMouseEnter={(e) => {
-              if (!geoLoading) {
-                (e.currentTarget as HTMLButtonElement).style.borderColor = activeColor.border;
-                (e.currentTarget as HTMLButtonElement).style.color = activeColor.textColor;
-              }
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-subtle)";
-              (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)";
-            }}
-          >
-            {geoLoading ? (
-              <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent" style={{ animation: "spin 0.8s linear infinite", display: "inline-block" }} />
-            ) : (
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <circle cx="12" cy="12" r="3" /><path d="M12 2v3m0 14v3M2 12h3m14 0h3" /><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" opacity="0" />
-              </svg>
+          {/* Dashed connector dots */}
+          <div className="flex flex-col gap-0.5 py-1 ml-3">
+            {[0,1,2].map(i => (
+              <div key={i} className="w-1 h-1 rounded-full" style={{ background: "var(--border-subtle)" }} />
+            ))}
+          </div>
+
+          {/* ── B: To ── */}
+          <div className="flex items-center gap-2.5 py-2.5">
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+              style={{ background: "linear-gradient(135deg,var(--amber),#D97706)", boxShadow: "0 0 8px var(--amber-glow)" }}
+            >B</div>
+            <input
+              ref={destInputRef}
+              type="text"
+              value={destQuery}
+              onChange={(e) => { setDestQuery(e.target.value); handleSearch(e.target.value); }}
+              onFocus={() => { setActiveInput("destination"); setSuggestions([]); }}
+              placeholder="To — a park or destination"
+              className="flex-1 bg-transparent text-sm outline-none min-w-0 font-grotesk"
+              style={{ color: "var(--text-primary)" }}
+            />
+            {activeInput === "destination" && (
+              <button
+                onClick={() => onSetPinMode("destination")}
+                className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(245,158,11,0.12)", border: "1px solid var(--border-amber)", color: "var(--amber-light)", fontSize: "12px" }}
+                title="Tap on map"
+              >📍</button>
             )}
-            {geoLoading ? "Getting location…" : "Use my current location"}
-          </button>
-
-          {geoError && (
-            <p className="text-[10px] text-center" style={{ color: "#F87171" }}>{geoError}</p>
-          )}
-
-          {/* Tap-on-map hint — TERTIARY */}
-          <p className="font-mono-ui text-[9px] text-center uppercase tracking-[0.10em]" style={{ color: "var(--text-disabled)" }}>
-            — or tap anywhere on the map —
-          </p>
+          </div>
         </div>
-      )}
 
-      {/* Refetch button — only when both pins are set */}
-      {origin && destination && (
-        <button
-          onClick={() => onFetchRoute(origin, destination)}
-          className="w-full py-2.5 rounded-xl font-grotesk text-sm font-bold transition-all duration-200"
-          style={{
-            background: "linear-gradient(135deg, var(--violet), #6D28D9)",
-            color: "#fff",
-            border: "1px solid rgba(167, 139, 250, 0.4)",
-            boxShadow: "0 0 16px var(--violet-glow), 0 4px 16px rgba(0,0,0,0.4)",
-            letterSpacing: "0.03em",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 28px var(--violet-glow), 0 4px 24px rgba(0,0,0,0.5)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 16px var(--violet-glow), 0 4px 16px rgba(0,0,0,0.4)";
-          }}
-        >
-          ✦ Find Cool Routes
-        </button>
-      )}
+        {/* Autocomplete suggestions */}
+        {suggestions.length > 0 && activeInput && (
+          <div className="mx-3 mb-2 rounded-2xl overflow-hidden" style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", animation: "slide-up 0.15s ease-out" }}>
+            {suggestions.slice(0, 5).map((f, i) => (
+              <button
+                key={i}
+                onClick={() => handleSelectSuggestion(f)}
+                className="w-full text-left px-3 py-2.5 flex items-start gap-2 transition-colors duration-100"
+                style={{ borderBottom: i < Math.min(suggestions.length, 5) - 1 ? "1px solid var(--border-subtle)" : "none" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-card)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                <svg className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: activeInput === "origin" ? "var(--jade-light)" : "var(--amber-light)" }} fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                <span className="text-xs leading-snug font-grotesk" style={{ color: "var(--text-primary)" }}>
+                  {f.place_name.split(",").slice(0, 3).join(",")}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {geoError && <p className="text-[10px] text-center px-3 pb-1" style={{ color: "#F87171" }}>{geoError}</p>}
+
+        {/* Route action / loading / error / cards */}
+        {!hasRoute && !routeLoading && !routeError && origin && destination && (
+          <div className="px-3 pb-3">
+            <button
+              onClick={() => onFetchRoute(origin, destination)}
+              className="w-full py-3 rounded-2xl font-grotesk text-sm font-bold"
+              style={{
+                background: "linear-gradient(135deg,var(--jade),#059669)",
+                color: "#fff",
+                border: "1px solid rgba(52,211,153,.4)",
+                boxShadow: "0 0 16px var(--jade-glow), 0 4px 16px rgba(0,0,0,.4)",
+              }}
+            >
+              🌳 Find Greenest Route
+            </button>
+          </div>
+        )}
+
+        {routeLoading && (
+          <div className="px-3 pb-3 flex items-center justify-center gap-2 py-3">
+            <span className="w-4 h-4 rounded-full border-2 border-t-transparent" style={{ animation: "spin 0.8s linear infinite", display: "inline-block", borderColor: "var(--jade)", borderTopColor: "transparent" }} />
+            <span className="font-grotesk text-sm" style={{ color: "var(--text-secondary)" }}>Finding best routes…</span>
+          </div>
+        )}
+
+        {routeError && (
+          <div className="mx-3 mb-3 px-3 py-2 rounded-xl" style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)" }}>
+            <p className="font-grotesk text-xs" style={{ color: "#F87171" }}>{routeError}</p>
+          </div>
+        )}
+
+        {hasRoute && (
+          <div className="px-3 pb-3 flex gap-2">
+            {coolRoute && (
+              <div className="flex-1 rounded-2xl p-3 flex flex-col gap-1" style={{ background: "rgba(16,185,129,.1)", border: "1px solid rgba(52,211,153,.3)", boxShadow: "0 0 10px rgba(16,185,129,.15)" }}>
+                <div className="flex items-center gap-1.5">
+                  <span>🌳</span>
+                  <span className="font-grotesk font-bold text-xs" style={{ color: "var(--jade-light)" }}>Shadiest</span>
+                </div>
+                <p className="font-grotesk font-bold text-2xl" style={{ color: "var(--text-display)" }}>{Math.round(coolRoute.time / 60000)} <span className="text-sm font-normal">min</span></p>
+                <p className="font-mono-ui text-[9px] uppercase tracking-[.10em]" style={{ color: "var(--text-disabled)" }}>
+                  {(coolRoute.distance / 1000).toFixed(1)} km · {Math.round(coolRoute.shadePct)}% shade
+                </p>
+              </div>
+            )}
+            {fastRoute && (
+              <div className="flex-1 rounded-2xl p-3 flex flex-col gap-1" style={{ background: "rgba(245,158,11,.1)", border: "1px solid rgba(245,158,11,.3)", boxShadow: "0 0 10px rgba(245,158,11,.15)" }}>
+                <div className="flex items-center gap-1.5">
+                  <span>⚡</span>
+                  <span className="font-grotesk font-bold text-xs" style={{ color: "var(--amber-light)" }}>Fastest</span>
+                </div>
+                <p className="font-grotesk font-bold text-2xl" style={{ color: "var(--text-display)" }}>{Math.round(fastRoute.time / 60000)} <span className="text-sm font-normal">min</span></p>
+                <p className="font-mono-ui text-[9px] uppercase tracking-[.10em]" style={{ color: "var(--text-disabled)" }}>
+                  {(fastRoute.distance / 1000).toFixed(1)} km · {Math.round(fastRoute.shadePct)}% shade
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

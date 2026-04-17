@@ -1,6 +1,6 @@
 "use client";
 
-import type { HeatmapInfo } from "./Map";
+interface HeatmapInfo { tree_count: number; lng: number; lat: number; }
 
 interface HeatmapPopupProps {
   info: HeatmapInfo;

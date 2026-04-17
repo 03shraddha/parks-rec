@@ -44,8 +44,8 @@ interface SerpEvent {
   type?: string;
 }
 
-// ── In-memory cache (resets on cold start) ────────────────────────────────────
-let cache: { data: FeatureCollection; expires: number } | null = null;
+// ── In-memory cache keyed by location string ─────────────────────────────────
+const cacheMap = new Map<string, { data: FeatureCollection; expires: number }>();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // ── Geocoding helper ─────────────────────────────────────────────────────────
@@ -81,8 +81,12 @@ async function geocodeAddress(
 
 // ── Main handler ──────────────────────────────────────────────────────────────
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: Request): Promise<NextResponse> {
   const serpApiKey = process.env.SERPAPI_KEY;
+
+  // Parse optional location query param (e.g. "Indiranagar" or "12.9716,77.5946")
+  const { searchParams } = new URL(request.url);
+  const locationParam = searchParams.get("location")?.trim() || "Bengaluru";
 
   // No SerpApi key — serve the curated static events as a fallback
   if (!serpApiKey) {
@@ -99,16 +103,18 @@ export async function GET(): Promise<NextResponse> {
 
   const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "";
 
-  // Return cached response if still fresh
-  if (cache && Date.now() < cache.expires) {
-    return NextResponse.json(cache.data);
+  // Return cached response if still fresh (keyed by location)
+  const cached = cacheMap.get(locationParam);
+  if (cached && Date.now() < cached.expires) {
+    return NextResponse.json(cached.data);
   }
 
   // ── Step 1: Fetch events from SerpApi ─────────────────────────────────────
+  const query = encodeURIComponent(`outdoor events ${locationParam}`);
   const serpUrl =
     `https://serpapi.com/search.json` +
     `?engine=google_events` +
-    `&q=outdoor+events+Bengaluru` +
+    `&q=${query}` +
     `&location=Bengaluru,Karnataka,India` +
     `&gl=in` +
     `&hl=en` +
@@ -135,7 +141,7 @@ export async function GET(): Promise<NextResponse> {
   // No events? Return empty FeatureCollection (not an error)
   if (!events.length) {
     const empty: FeatureCollection = { type: "FeatureCollection", features: [] };
-    cache = { data: empty, expires: Date.now() + CACHE_TTL_MS };
+    cacheMap.set(locationParam, { data: empty, expires: Date.now() + CACHE_TTL_MS });
     return NextResponse.json(empty);
   }
 
@@ -194,7 +200,7 @@ export async function GET(): Promise<NextResponse> {
     features,
   };
 
-  cache = { data: featureCollection, expires: Date.now() + CACHE_TTL_MS };
+  cacheMap.set(locationParam, { data: featureCollection, expires: Date.now() + CACHE_TTL_MS });
 
   return NextResponse.json(featureCollection);
 }

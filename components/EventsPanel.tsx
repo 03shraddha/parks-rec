@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { EventInfo } from "./Map";
 
 interface EventFeature {
@@ -11,6 +12,7 @@ interface EventsPanelProps {
   events: EventFeature[];
   onEventSelect: (lng: number, lat: number, info: EventInfo) => void;
   onClose: () => void;
+  onLocationSearch?: (location: string) => void;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -39,7 +41,15 @@ const TIMING_COLORS: Record<string, string> = {
   Upcoming: "#60A5FA",
 };
 
-export default function EventsPanel({ events, onEventSelect, onClose }: EventsPanelProps) {
+export default function EventsPanel({ events, onEventSelect, onClose, onLocationSearch }: EventsPanelProps) {
+  const [locationQuery, setLocationQuery] = useState("");
+
+  const handleLocationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = locationQuery.trim();
+    if (q && onLocationSearch) onLocationSearch(q);
+  };
+
   return (
     <div
       className="pointer-events-auto rounded-2xl overflow-hidden flex flex-col"
@@ -49,7 +59,7 @@ export default function EventsPanel({ events, onEventSelect, onClose }: EventsPa
         border: "1px solid rgba(244, 114, 182, 0.18)",
         boxShadow: "0 0 16px rgba(244,114,182,0.25), 0 12px 40px rgba(0,0,0,0.6)",
         width: "260px",
-        maxHeight: "420px",
+        maxHeight: "480px",
         animation: "slide-up 0.28s cubic-bezier(0.16,1,0.3,1)",
       }}
     >
@@ -87,6 +97,31 @@ export default function EventsPanel({ events, onEventSelect, onClose }: EventsPa
           ✕
         </button>
       </div>
+
+      {/* Location search input */}
+      {onLocationSearch && (
+        <form onSubmit={handleLocationSubmit} className="px-3 py-2 shrink-0" style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
+          <div
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
+            style={{ background: "var(--bg-surface)", border: "1px solid rgba(244,114,182,0.25)" }}
+          >
+            <svg className="w-3 h-3 shrink-0" style={{ color: "#F472B6" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              value={locationQuery}
+              onChange={(e) => setLocationQuery(e.target.value)}
+              placeholder="Search near neighbourhood…"
+              className="flex-1 bg-transparent text-xs outline-none min-w-0 font-grotesk"
+              style={{ color: "var(--text-primary)" }}
+            />
+            <button type="submit" className="shrink-0 text-[10px] font-grotesk font-semibold px-2 py-0.5 rounded-lg" style={{ background: "rgba(244,114,182,0.2)", color: "#F472B6", border: "1px solid rgba(244,114,182,0.3)" }}>
+              Go
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Scrollable event list */}
       <div className="overflow-y-auto flex-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(244,114,182,0.3) transparent" }}>
