@@ -29,7 +29,7 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
       {/* Pink top accent line */}
       <div className="h-0.5 w-full" style={{ background: pinkGradient }} />
 
-      {/* Header row — category badge + close button */}
+      {/* Header row - category badge + close button */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2 gap-2">
         {/* TERTIARY: category badge */}
         <span
@@ -67,7 +67,7 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
         </button>
       </div>
 
-      {/* PRIMARY: event title — the visual anchor of this popup */}
+      {/* PRIMARY: event title - the visual anchor of this popup */}
       <div className="px-4 pb-3">
         <h3
           className="font-grotesk font-bold text-lg leading-snug"
@@ -100,7 +100,7 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
         </p>
       </div>
 
-      {/* "Get Tickets" button — only rendered when ticket_url is present */}
+      {/* "Get Tickets" button - only rendered when ticket_url is present */}
       {info.ticket_url && (
         <>
           <div style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }} />

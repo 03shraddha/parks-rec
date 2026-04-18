@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Map.tsx — MapLibre GL JS full-screen map.
+ * Map.tsx - MapLibre GL JS full-screen map.
  *
  * Responsibilities:
  *  - Render the base MapTiler style
@@ -63,6 +63,8 @@ export type PinMode = "origin" | "destination" | null;
 /** Imperative handle exposed to parent via ref */
 export interface MapHandle {
   flyTo(lng: number, lat: number, zoom?: number): void;
+  updateLivePosition(lng: number, lat: number): void;
+  clearLivePosition(): void;
 }
 
 export interface LayerVisibility {
@@ -128,11 +130,29 @@ export default function Map({
 
   // Track whether the map has been initialised yet (skip the first theme effect run)
   const mapReadyRef = useRef(false);
+  const liveMarkerRef = useRef<maplibregl.Marker | null>(null);
 
-  // ── Imperative handle — exposes flyTo to parent via ref ───────────────────
+  // ── Imperative handle - exposes flyTo and live position to parent via ref ──
   useImperativeHandle(ref, () => ({
     flyTo(lng: number, lat: number, zoom = 15) {
       mapRef.current?.flyTo({ center: [lng, lat], zoom, speed: 1.4, curve: 1.4 });
+    },
+    updateLivePosition(lng: number, lat: number) {
+      const map = mapRef.current;
+      if (!map) return;
+      if (!liveMarkerRef.current) {
+        const el = createLiveDotEl();
+        liveMarkerRef.current = new maplibregl.Marker({ element: el, anchor: "center" })
+          .setLngLat([lng, lat])
+          .addTo(map);
+      } else {
+        liveMarkerRef.current.setLngLat([lng, lat]);
+      }
+      map.easeTo({ center: [lng, lat], duration: 600 });
+    },
+    clearLivePosition() {
+      liveMarkerRef.current?.remove();
+      liveMarkerRef.current = null;
     },
   }));
 
@@ -155,6 +175,16 @@ export default function Map({
     map.on("load", () => {
       addDataSources(map);
       addDataLayers(map);
+      // Apply any layers toggled before the map finished loading
+      const vis = visibleLayersRef.current;
+      setLayerVisibility(map, LAYER_IDS.treeDensity, vis.trees);
+      setLayerVisibility(map, LAYER_IDS.parksFill, vis.parks);
+      setLayerVisibility(map, LAYER_IDS.parksStroke, vis.parks);
+      setLayerVisibility(map, LAYER_IDS.lakesFill, vis.lakes);
+      setLayerVisibility(map, LAYER_IDS.lakesStroke, vis.lakes);
+      setLayerVisibility(map, LAYER_IDS.busStops, vis.busStops);
+      setLayerVisibility(map, LAYER_IDS.trails, vis.trails);
+      setLayerVisibility(map, LAYER_IDS.events, vis.events);
       mapReadyRef.current = true;
     });
 
@@ -268,7 +298,7 @@ export default function Map({
   // ── Theme / map style swap ────────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
-    // Skip the very first run — map initialised with the correct style already
+    // Skip the very first run - map initialised with the correct style already
     if (!map || !mapReadyRef.current) return;
 
     map.setStyle(getBaseStyleUrl(theme));
@@ -334,22 +364,31 @@ export default function Map({
   // ── Layer visibility ──────────────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
-    setLayerVisibility(map, LAYER_IDS.treeDensity, visibleLayers.trees);
-    setLayerVisibility(map, LAYER_IDS.parksFill, visibleLayers.parks);
-    setLayerVisibility(map, LAYER_IDS.parksStroke, visibleLayers.parks);
-    setLayerVisibility(map, LAYER_IDS.lakesFill, visibleLayers.lakes);
-    setLayerVisibility(map, LAYER_IDS.lakesStroke, visibleLayers.lakes);
-    setLayerVisibility(map, LAYER_IDS.busStops, visibleLayers.busStops);
-    setLayerVisibility(map, LAYER_IDS.trails, visibleLayers.trails);
-    setLayerVisibility(map, LAYER_IDS.events, visibleLayers.events);
+    if (!map) return;
+
+    const apply = () => {
+      setLayerVisibility(map, LAYER_IDS.treeDensity, visibleLayers.trees);
+      setLayerVisibility(map, LAYER_IDS.parksFill, visibleLayers.parks);
+      setLayerVisibility(map, LAYER_IDS.parksStroke, visibleLayers.parks);
+      setLayerVisibility(map, LAYER_IDS.lakesFill, visibleLayers.lakes);
+      setLayerVisibility(map, LAYER_IDS.lakesStroke, visibleLayers.lakes);
+      setLayerVisibility(map, LAYER_IDS.busStops, visibleLayers.busStops);
+      setLayerVisibility(map, LAYER_IDS.trails, visibleLayers.trails);
+      setLayerVisibility(map, LAYER_IDS.events, visibleLayers.events);
+    };
+
+    if (!map.isStyleLoaded()) {
+      // Retry once the style finishes loading (handles clicks before map is ready)
+      map.once("style.load", apply);
+      return () => { map.off("style.load", apply); };
+    }
+    apply();
   }, [visibleLayers]);
 
   // ── Trails auto-fit ──────────────────────────────────────────────────────
-  // When trails are toggled on, fit the map to show all trail locations across Bangalore.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !map.isStyleLoaded() || !visibleLayers.trails) return;
     if (visibleLayers.trails) {
       // Pre-computed bbox of all 8 static trail features in Bangalore
       const TRAILS_BOUNDS: [[number, number], [number, number]] = [
@@ -362,7 +401,6 @@ export default function Map({
   }, [visibleLayers.trails]);
 
   // ── Events data fetch ─────────────────────────────────────────────────────
-  // Fetches /api/events when the events layer is on. Re-fetches when eventsLocation changes.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
@@ -382,7 +420,7 @@ export default function Map({
           return res.json();
         })
         .then((geojson) => {
-          // Re-acquire source after async — style may have swapped
+          // Re-acquire source after async - style may have swapped
           const s = mapRef.current?.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
           s?.setData(geojson);
           // Notify parent with the loaded event features for the side panel
@@ -526,7 +564,7 @@ function addDataLayers(map: maplibregl.Map) {
     layout: { visibility: "none" },
   });
 
-  // Trails / walking paths — dashed green, drawn under route lines
+  // Trails / walking paths - dashed green, drawn under route lines
   map.addLayer({
     id: LAYER_IDS.trails,
     type: "line",
@@ -534,14 +572,14 @@ function addDataLayers(map: maplibregl.Map) {
     paint: {
       "line-color": COLORS.trailLine,
       "line-width": 2.5,
-      // Dashed pattern: 4px dash, 3px gap — distinct from solid route lines
+      // Dashed pattern: 4px dash, 3px gap - distinct from solid route lines
       "line-dasharray": [4, 3],
       "line-opacity": 0.90,
     },
     layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
   });
 
-  // Events — pink circle pins, drawn above data layers but below route lines
+  // Events - pink circle pins, drawn above data layers but below route lines
   map.addLayer({
     id: LAYER_IDS.events,
     type: "circle",
@@ -626,6 +664,29 @@ function setLayerVisibility(
 ) {
   if (!map.getLayer(layerId)) return;
   map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+}
+
+function createLiveDotEl(): HTMLElement {
+  const el = document.createElement("div");
+  el.style.cssText = `
+    width: 20px; height: 20px; cursor: default;
+    display: flex; align-items: center; justify-content: center;
+  `;
+  el.innerHTML = `
+    <div style="
+      width:14px; height:14px; border-radius:50%;
+      background:#3B82F6; border:3px solid #fff;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.3), 0 0 12px rgba(59,130,246,0.5);
+      animation: live-pulse 1.8s ease-in-out infinite;
+    "></div>
+    <style>
+      @keyframes live-pulse {
+        0%,100% { box-shadow: 0 0 0 4px rgba(59,130,246,0.3), 0 0 12px rgba(59,130,246,0.5); }
+        50%      { box-shadow: 0 0 0 8px rgba(59,130,246,0.1), 0 0 20px rgba(59,130,246,0.3); }
+      }
+    </style>
+  `;
+  return el;
 }
 
 function createPinEl(color: string, label: string): HTMLElement {

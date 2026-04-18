@@ -95,8 +95,7 @@
 body {
   background: var(--bg-deep);
   color: var(--text-primary);
-  /* Primary body font: Space Grotesk */
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'M PLUS Rounded 1c', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -142,14 +141,15 @@ html, body, #__next {
 
 /* ── Reusable utility classes ─────────────────────────────────────────── */
 
-/* Frosted glass panel — base of every UI card */
+/* Frosted glass panel - cinematic anime aesthetic */
 .anime-panel {
   background: var(--bg-card);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(180%) brightness(1.04);
+  -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.04);
   border: 1px solid var(--border-violet);
-  animation: slide-up 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slide-up 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
 }
 
 .anime-panel-jade  { border-color: var(--border-jade);  }
@@ -163,23 +163,23 @@ html, body, #__next {
 [data-theme="dark"] .glow-jade   { box-shadow: 0 0 14px var(--jade-glow),   0 8px 32px rgba(0,0,0,0.6); }
 [data-theme="dark"] .glow-amber  { box-shadow: 0 0 14px var(--amber-glow),  0 8px 32px rgba(0,0,0,0.6); }
 
-/* Legacy Syne alias — kept so existing className uses still compile */
-.font-syne { font-family: 'Space Grotesk', sans-serif; }
+/* Legacy alias - kept so existing className uses still compile */
+.font-syne { font-family: 'M PLUS Rounded 1c', sans-serif; }
 
-/* ── Design system typography helpers ────────────────────────────────── */
+/* ── Design system typography helpers ─────────────────────────────────── */
 
-/* Primary body / subheading font */
-.font-grotesk { font-family: 'Space Grotesk', sans-serif; }
+/* Primary body / subheading font - anime-style rounded */
+.font-grotesk { font-family: 'M PLUS Rounded 1c', sans-serif; }
 
-/* Tertiary / metadata font — always pair with uppercase + wide tracking */
+/* Hero display / headings - cinematic Japanese-inspired */
+.font-zen { font-family: 'Zen Kaku Gothic New', sans-serif; }
+
+/* Tertiary / metadata font - always pair with uppercase + wide tracking */
 .font-mono-ui { font-family: 'Space Mono', monospace; }
-
-/* Doto — reserved for hero display moments only */
-.font-doto { font-family: 'Doto', sans-serif; }
 
 /* Three-layer text helpers */
 .text-display {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
   color: var(--text-display);
 }
 .text-tertiary {

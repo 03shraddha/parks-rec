@@ -46,7 +46,7 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
           color: "#F87171",
           glow: "rgba(248,113,113,0.45)",
           gradient: "linear-gradient(135deg, #EF4444, #DC2626)",
-          label: "Exposed — no shade",
+          label: "Exposed - no shade",
         };
 
   return (
@@ -63,7 +63,7 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
       {/* Coloured top accent line */}
       <div className="h-0.5 w-full" style={{ background: gradient }} />
 
-      {/* Header — SECONDARY: road name is supporting context */}
+      {/* Header - SECONDARY: road name is supporting context */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2">
         <span
           className="font-grotesk font-semibold text-sm truncate pr-2"
@@ -93,7 +93,7 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
         </button>
       </div>
 
-      {/* Shade score — PRIMARY hero: ONE thing seen first, absurdly large */}
+      {/* Shade score - PRIMARY hero: ONE thing seen first, absurdly large */}
       <div className="px-4 pb-1" style={{ position: "relative" }}>
         {/* Shade score label row with explainer */}
         <div className="flex items-center gap-1.5 mb-1 relative">
@@ -121,7 +121,7 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
           <ShadeExplainerTooltip visible={showExplainer} onClose={() => setShowExplainer(false)} />
         </div>
 
-        {/* PRIMARY: display-size number — the visual anchor of this popup */}
+        {/* PRIMARY: display-size number - the visual anchor of this popup */}
         <div className="flex items-end gap-2 mb-2">
           <span
             className="font-grotesk font-bold leading-none"

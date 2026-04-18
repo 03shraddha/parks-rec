@@ -40,7 +40,7 @@ let roadsCache: ReturnType<typeof loadRoads> | null = null;
 function loadRoads() {
   const filePath = path.join(process.cwd(), "public", "data", "roads-shaded.geojson");
   if (!fs.existsSync(filePath)) {
-    // Return empty array — shade scoring will use default 0 scores
+    // Return empty array - shade scoring will use default 0 scores
     console.warn("roads-shaded.geojson not found. Run scripts/05_roads_shade.py first.");
     return [];
   }

@@ -74,7 +74,7 @@ async function geocodeAddress(
 
     return center; // [lng, lat]
   } catch {
-    // Network or parse error — skip this event
+    // Network or parse error - skip this event
     return null;
   }
 }
@@ -88,7 +88,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const locationParam = searchParams.get("location")?.trim() || "Bengaluru";
 
-  // No SerpApi key — serve the curated static events as a fallback
+  // No SerpApi key - serve the curated static events as a fallback
   if (!serpApiKey) {
     try {
       const { readFile } = await import("fs/promises");
@@ -110,7 +110,10 @@ export async function GET(request: Request): Promise<NextResponse> {
   }
 
   // ── Step 1: Fetch events from SerpApi ─────────────────────────────────────
-  const query = encodeURIComponent(`outdoor events ${locationParam}`);
+  const defaultQuery = locationParam === "Bengaluru"
+    ? "music tech food outdoor cultural events Bengaluru"
+    : `events ${locationParam}`;
+  const query = encodeURIComponent(defaultQuery);
   const serpUrl =
     `https://serpapi.com/search.json` +
     `?engine=google_events` +
@@ -130,7 +133,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       );
     }
     const json = await res.json();
-    // events_results may be absent when there are no results — default to []
+    // events_results may be absent when there are no results - default to []
     events = json?.events_results ?? [];
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to fetch events";
@@ -158,7 +161,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       if (!address) return;
 
       const coords = await geocodeAddress(address, maptilerKey);
-      if (!coords) return; // geocoding failed — skip silently
+      if (!coords) return; // geocoding failed - skip silently
 
       // Parse date and time out of SerpApi's date fields.
       // `start_date` is e.g. "Saturday, April 5"

@@ -34,7 +34,7 @@ export default function TrailPopup({ info, onClose }: TrailPopupProps) {
       {/* Green top accent */}
       <div className="h-0.5 w-full" style={{ background: GREEN_GRADIENT }} />
 
-      {/* Header — surface badge + close */}
+      {/* Header - surface badge + close */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2">
         <span
           className="font-mono-ui uppercase tracking-[0.14em] px-2 py-0.5 rounded-full"

@@ -51,7 +51,7 @@ export default function HeatmapLegend() {
                 className="font-grotesk text-xs"
                 style={{ color: "var(--text-muted)", marginLeft: "4px" }}
               >
-                — {tier.desc}
+                - {tier.desc}
               </span>
             </div>
           </div>

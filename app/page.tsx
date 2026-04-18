@@ -8,6 +8,7 @@ import TrailPopup from "@/components/TrailPopup";
 import EventsPanel from "@/components/EventsPanel";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
 import ParkPanel from "@/components/ParkPanel";
+import NavigationPanel from "@/components/NavigationPanel";
 import type { LayerVisibility, PinMode, Theme, MapHandle, EventInfo, TrailInfo, EventFeature } from "@/components/Map";
 import type { ParkInfo } from "@/components/ParkPanel";
 import type { ScoredRoute, SegmentInfo } from "@/lib/shadeScoring";
@@ -15,7 +16,7 @@ import { scoreRoute, pickRoutes } from "@/lib/shadeScoring";
 import type { Coordinate } from "@/lib/graphhopper";
 import { fetchRoutes } from "@/lib/graphhopper";
 
-// Cache roads-shaded.geojson after the first fetch — it's ~several MB and never changes at runtime
+// Cache roads-shaded.geojson after the first fetch - it's ~several MB and never changes at runtime
 let roadsCache: unknown[] | null = null;
 async function loadRoads(): Promise<unknown[]> {
   if (roadsCache) return roadsCache;
@@ -28,7 +29,7 @@ async function loadRoads(): Promise<unknown[]> {
   return features;
 }
 
-// MapLibre uses browser APIs — must be client-only
+// MapLibre uses browser APIs - must be client-only
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 
 export default function HomePage() {
@@ -48,6 +49,9 @@ export default function HomePage() {
 
   // ── UI mode: idle = layer pills + search bar, planning = From/To inputs ────
   const [uiMode, setUiMode] = useState<"idle" | "planning">("idle");
+
+  // ── Navigation mode ───────────────────────────────────────────────────────
+  const [activeNavRoute, setActiveNavRoute] = useState<{ route: ScoredRoute; type: "cool" | "fast" } | null>(null);
 
   // ── Map interaction state ────────────────────────────────────────────────
   const [pinMode, setPinMode] = useState<PinMode>(null);
@@ -86,6 +90,7 @@ export default function HomePage() {
 
   // ── Events panel list ─────────────────────────────────────────────────────
   const [eventsList, setEventsList] = useState<EventFeature[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
   const [eventsLocation, setEventsLocation] = useState<string | undefined>(undefined);
 
   // ── Onboarding ────────────────────────────────────────────────────────────
@@ -151,8 +156,14 @@ export default function HomePage() {
   const toggleLayer = useCallback((key: keyof LayerVisibility) => {
     setVisibleLayers((prev) => {
       const next = { ...prev, [key]: !prev[key] };
-      // Clear events list when events layer is turned off
-      if (key === "events" && prev.events) setEventsList([]);
+      if (key === "events") {
+        if (prev.events) {
+          setEventsList([]);
+          setEventsLoading(false);
+        } else {
+          setEventsLoading(true); // show panel immediately with skeleton
+        }
+      }
       return next;
     });
   }, []);
@@ -188,7 +199,7 @@ export default function HomePage() {
         onSegmentClick={setSegmentInfo}
         onEventClick={setEventInfo}
         onTrailClick={setTrailInfo}
-        onEventsLoaded={setEventsList}
+        onEventsLoaded={(features) => { setEventsList(features); setEventsLoading(false); }}
         onParkClick={setParkInfo}
       />
 
@@ -210,14 +221,14 @@ export default function HomePage() {
             🌿
           </div>
           <div>
-            {/* PRIMARY — the one thing seen first in this panel */}
+            {/* PRIMARY - the one thing seen first in this panel */}
             <p
-              className="font-grotesk font-bold leading-tight text-base"
-              style={{ color: "var(--text-display)" }}
+              className="font-zen font-bold leading-tight text-base"
+              style={{ color: "var(--text-display)", letterSpacing: "-0.01em" }}
             >
               Walk the City
             </p>
-            {/* TERTIARY — Space Mono ALL CAPS, pushed visually to background */}
+            {/* TERTIARY - Space Mono ALL CAPS, pushed visually to background */}
             <p
               className="font-mono-ui leading-tight"
               style={{
@@ -301,6 +312,7 @@ export default function HomePage() {
           onPinDrop={handlePinDrop}
           onFetchRoute={fetchRoute}
           onSetPinMode={setPinMode}
+          onStartNavigation={(route, type) => setActiveNavRoute({ route, type })}
         />
       </div>
 
@@ -345,22 +357,25 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Events side panel — shows when events layer is active ─────────── */}
-      {visibleLayers.events && eventsList.length > 0 && !eventInfo && (
+      {/* ── Events side panel - shows as soon as events layer is toggled on ── */}
+      {visibleLayers.events && !eventInfo && (
         <div className="absolute top-20 right-4 z-20 pointer-events-none">
           <EventsPanel
             events={eventsList}
+            isLoading={eventsLoading}
             onEventSelect={(lng, lat, info) => {
               mapHandleRef.current?.flyTo(lng, lat, 15);
               setEventInfo({ ...info, lng, lat });
             }}
             onClose={() => {
               setEventsList([]);
+              setEventsLoading(false);
               toggleLayer("events");
             }}
             onLocationSearch={(location) => {
               setEventsLocation(location);
-              setEventsList([]); // clear while re-fetching
+              setEventsList([]);
+              setEventsLoading(true);
             }}
           />
         </div>
@@ -396,6 +411,21 @@ export default function HomePage() {
 
       {/* ── First-run onboarding overlay ──────────────────────────────────── */}
       {showOnboarding && <OnboardingOverlay onClose={() => setShowOnboarding(false)} />}
+
+      {/* ── Turn-by-turn navigation panel ────────────────────────────────── */}
+      {activeNavRoute && (
+        <NavigationPanel
+          route={activeNavRoute.route}
+          routeType={activeNavRoute.type}
+          onExit={() => {
+            mapHandleRef.current?.clearLivePosition();
+            setActiveNavRoute(null);
+          }}
+          onPositionUpdate={(coord) => {
+            mapHandleRef.current?.updateLivePosition(coord.lng, coord.lat);
+          }}
+        />
+      )}
     </main>
   );
 }
@@ -439,7 +469,7 @@ async function geocodeQuery(value: string): Promise<GeoFeature[]> {
       })
     );
   }
-  // Nominatim fallback — free, full Indian POI coverage
+  // Nominatim fallback - free, full Indian POI coverage
   const q = encodeURIComponent(value.trim());
   const res = await fetch(
     `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=5&countrycodes=in&bounded=1&viewbox=77.30,13.15,77.85,12.70&addressdetails=1`,
@@ -471,6 +501,7 @@ function BottomSheet({
   onPinDrop,
   onFetchRoute,
   onSetPinMode,
+  onStartNavigation,
 }: {
   uiMode: "idle" | "planning";
   origin: Coordinate | null;
@@ -488,6 +519,7 @@ function BottomSheet({
   onPinDrop: (mode: "origin" | "destination", coord: Coordinate, label?: string) => void;
   onFetchRoute: (o: Coordinate, d: Coordinate) => void;
   onSetPinMode: (m: PinMode) => void;
+  onStartNavigation: (route: ScoredRoute, type: "cool" | "fast") => void;
 }) {
   const [activeInput, setActiveInput] = useState<"origin" | "destination" | null>(null);
   const [originQuery, setOriginQuery] = useState(originLabel);
@@ -574,7 +606,7 @@ function BottomSheet({
             boxShadow: "0 -4px 32px rgba(0,0,0,0.18)",
           }}
         >
-          {/* Layer pills — horizontal scroll, no scrollbar */}
+          {/* Layer pills - horizontal scroll, no scrollbar */}
           <div className="flex gap-2 px-3 pt-3 pb-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
             {LAYER_PILLS.map(({ key, icon, label, color, glow, border }) => {
               const on = visibleLayers[key];
@@ -664,7 +696,7 @@ function BottomSheet({
               value={originQuery}
               onChange={(e) => { setOriginQuery(e.target.value); handleSearch(e.target.value); }}
               onFocus={() => { setActiveInput("origin"); setSuggestions([]); }}
-              placeholder="From — your start point"
+              placeholder="From - your start point"
               className="flex-1 bg-transparent text-sm outline-none min-w-0 font-grotesk"
               style={{ color: "var(--text-primary)" }}
             />
@@ -712,7 +744,7 @@ function BottomSheet({
               value={destQuery}
               onChange={(e) => { setDestQuery(e.target.value); handleSearch(e.target.value); }}
               onFocus={() => { setActiveInput("destination"); setSuggestions([]); }}
-              placeholder="To — a park or destination"
+              placeholder="To - a park or destination"
               className="flex-1 bg-transparent text-sm outline-none min-w-0 font-grotesk"
               style={{ color: "var(--text-primary)" }}
             />
@@ -784,31 +816,47 @@ function BottomSheet({
         )}
 
         {hasRoute && (
-          <div className="px-3 pb-3 flex gap-2">
-            {coolRoute && (
-              <div className="flex-1 rounded-2xl p-3 flex flex-col gap-1" style={{ background: "rgba(16,185,129,.1)", border: "1px solid rgba(52,211,153,.3)", boxShadow: "0 0 10px rgba(16,185,129,.15)" }}>
-                <div className="flex items-center gap-1.5">
-                  <span>🌳</span>
-                  <span className="font-grotesk font-bold text-xs" style={{ color: "var(--jade-light)" }}>Shadiest</span>
+          <div className="px-3 pb-3 flex flex-col gap-2">
+            <div className="flex gap-2">
+              {coolRoute && (
+                <div className="flex-1 rounded-2xl p-3 flex flex-col gap-1" style={{ background: "rgba(16,185,129,.1)", border: "1px solid rgba(52,211,153,.3)", boxShadow: "0 0 10px rgba(16,185,129,.15)" }}>
+                  <div className="flex items-center gap-1.5">
+                    <span>🌳</span>
+                    <span className="font-grotesk font-bold text-xs" style={{ color: "var(--jade-light)" }}>Shadiest</span>
+                  </div>
+                  <p className="font-grotesk font-bold text-2xl" style={{ color: "var(--text-display)" }}>{Math.round(coolRoute.time / 60000)} <span className="text-sm font-normal">min</span></p>
+                  <p className="font-mono-ui text-[9px] uppercase tracking-[.10em]" style={{ color: "var(--text-disabled)" }}>
+                    {(coolRoute.distance / 1000).toFixed(1)} km · {Math.round(coolRoute.shadePct)}% shade
+                  </p>
+                  <button
+                    onClick={() => onStartNavigation(coolRoute, "cool")}
+                    className="mt-1 w-full py-1.5 rounded-xl font-grotesk text-xs font-bold"
+                    style={{ background: "rgba(16,185,129,.2)", color: "var(--jade-light)", border: "1px solid rgba(52,211,153,.4)" }}
+                  >
+                    Start
+                  </button>
                 </div>
-                <p className="font-grotesk font-bold text-2xl" style={{ color: "var(--text-display)" }}>{Math.round(coolRoute.time / 60000)} <span className="text-sm font-normal">min</span></p>
-                <p className="font-mono-ui text-[9px] uppercase tracking-[.10em]" style={{ color: "var(--text-disabled)" }}>
-                  {(coolRoute.distance / 1000).toFixed(1)} km · {Math.round(coolRoute.shadePct)}% shade
-                </p>
-              </div>
-            )}
-            {fastRoute && (
-              <div className="flex-1 rounded-2xl p-3 flex flex-col gap-1" style={{ background: "rgba(245,158,11,.1)", border: "1px solid rgba(245,158,11,.3)", boxShadow: "0 0 10px rgba(245,158,11,.15)" }}>
-                <div className="flex items-center gap-1.5">
-                  <span>⚡</span>
-                  <span className="font-grotesk font-bold text-xs" style={{ color: "var(--amber-light)" }}>Fastest</span>
+              )}
+              {fastRoute && (
+                <div className="flex-1 rounded-2xl p-3 flex flex-col gap-1" style={{ background: "rgba(245,158,11,.1)", border: "1px solid rgba(245,158,11,.3)", boxShadow: "0 0 10px rgba(245,158,11,.15)" }}>
+                  <div className="flex items-center gap-1.5">
+                    <span>⚡</span>
+                    <span className="font-grotesk font-bold text-xs" style={{ color: "var(--amber-light)" }}>Fastest</span>
+                  </div>
+                  <p className="font-grotesk font-bold text-2xl" style={{ color: "var(--text-display)" }}>{Math.round(fastRoute.time / 60000)} <span className="text-sm font-normal">min</span></p>
+                  <p className="font-mono-ui text-[9px] uppercase tracking-[.10em]" style={{ color: "var(--text-disabled)" }}>
+                    {(fastRoute.distance / 1000).toFixed(1)} km · {Math.round(fastRoute.shadePct)}% shade
+                  </p>
+                  <button
+                    onClick={() => onStartNavigation(fastRoute, "fast")}
+                    className="mt-1 w-full py-1.5 rounded-xl font-grotesk text-xs font-bold"
+                    style={{ background: "rgba(245,158,11,.2)", color: "var(--amber-light)", border: "1px solid rgba(245,158,11,.4)" }}
+                  >
+                    Start
+                  </button>
                 </div>
-                <p className="font-grotesk font-bold text-2xl" style={{ color: "var(--text-display)" }}>{Math.round(fastRoute.time / 60000)} <span className="text-sm font-normal">min</span></p>
-                <p className="font-mono-ui text-[9px] uppercase tracking-[.10em]" style={{ color: "var(--text-disabled)" }}>
-                  {(fastRoute.distance / 1000).toFixed(1)} km · {Math.round(fastRoute.shadePct)}% shade
-                </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>

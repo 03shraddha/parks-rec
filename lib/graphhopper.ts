@@ -20,6 +20,7 @@ export interface GHInstruction {
   distance: number;
   time: number;
   interval: [number, number];
+  sign: number; // 0=straight, -2=left, 2=right, -3=sharp-left, 3=sharp-right, 4=arrive, 5=u-turn, 7=roundabout
 }
 
 export interface GeoJSONLineString {
@@ -52,7 +53,7 @@ export async function fetchRoutes(
   url.searchParams.set("alternative_route.max_paths", String(maxPaths));
   url.searchParams.set("alternative_route.max_weight_factor", "1.6");
   url.searchParams.set("alternative_route.max_share_factor", "0.7");
-  url.searchParams.set("instructions", "false");
+  url.searchParams.set("instructions", "true");
 
   // GraphHopper expects point[]=lat,lng (note: lat first)
   url.searchParams.append("point", `${origin.lat},${origin.lng}`);

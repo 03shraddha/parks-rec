@@ -11,7 +11,7 @@ function getTier(count: number): { label: string; color: string; desc: string; e
   if (count <= 50)  return { label: "Scorching", color: "#FF4500", desc: "Very little tree cover in this area. Expect strong direct sun exposure.", emoji: "🔥" };
   if (count <= 150) return { label: "Hot",       color: "#FF8C00", desc: "Some trees present but shade is sparse. Pack sunscreen.", emoji: "☀️" };
   if (count <= 299) return { label: "Warm",      color: "#FFD700", desc: "Moderate tree canopy provides partial shade.", emoji: "🌤" };
-  return              { label: "Cool",      color: "#90EE90", desc: "Dense tree canopy — this area offers solid shade for walking.", emoji: "🌳" };
+  return              { label: "Cool",      color: "#90EE90", desc: "Dense tree canopy - this area offers solid shade for walking.", emoji: "🌳" };
 }
 
 export default function HeatmapPopup({ info, onClose }: HeatmapPopupProps) {

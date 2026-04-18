@@ -13,7 +13,7 @@ interface RoutePanelProps {
 }
 
 export default function RoutePanel({ fastRoute, coolRoute, loading, error }: RoutePanelProps) {
-  /* ── Loading state — shimmer + glowing spinner ── */
+  /* ── Loading state - shimmer + glowing spinner ── */
   if (loading) {
     return (
       <div
@@ -71,7 +71,7 @@ export default function RoutePanel({ fastRoute, coolRoute, loading, error }: Rou
 
   return (
     <div className="pointer-events-auto flex flex-col gap-2.5">
-      {/* Cool Route — jade/teal theme */}
+      {/* Cool Route - jade/teal theme */}
       {coolRoute && (
         <RouteCard
           label="Cool Route"
@@ -89,7 +89,7 @@ export default function RoutePanel({ fastRoute, coolRoute, loading, error }: Rou
         />
       )}
 
-      {/* Fast Route — amber/gold theme */}
+      {/* Fast Route - amber/gold theme */}
       {fastRoute && (
         <RouteCard
           label="Fast Route"
@@ -102,7 +102,7 @@ export default function RoutePanel({ fastRoute, coolRoute, loading, error }: Rou
         />
       )}
 
-      {/* TERTIARY hint — Space Mono ALL CAPS */}
+      {/* TERTIARY hint - Space Mono ALL CAPS */}
       <p
         className="font-mono-ui text-[9px] text-center uppercase tracking-[0.12em]"
         style={{ color: "var(--text-disabled)" }}
@@ -168,9 +168,9 @@ function RouteCard({
         )}
       </div>
 
-      {/* Stats — three-layer hierarchy */}
+      {/* Stats - three-layer hierarchy */}
       <div className="px-4 pt-3 pb-1">
-        {/* PRIMARY: Walk time — the hero number, seen first */}
+        {/* PRIMARY: Walk time - the hero number, seen first */}
         <div className="flex items-baseline gap-1 mb-0.5">
           <span
             className="font-grotesk font-bold leading-none"
@@ -187,7 +187,7 @@ function RouteCard({
           Walk time
         </p>
 
-        {/* SECONDARY: Distance — grouped tight (8px) to primary */}
+        {/* SECONDARY: Distance - grouped tight (8px) to primary */}
         <div className="flex items-baseline gap-1 mb-0.5">
           <span
             className="font-grotesk font-semibold text-base leading-none"
@@ -205,7 +205,7 @@ function RouteCard({
         </p>
       </div>
 
-      {/* ONE VISUAL BREAK — Shade % absurdly prominent against the rest */}
+      {/* ONE VISUAL BREAK - Shade % absurdly prominent against the rest */}
       <div
         className="mx-4 mb-3 px-3 py-2 rounded-xl flex items-center justify-between"
         style={{
@@ -263,4 +263,4 @@ function RouteCard({
   );
 }
 
-/* Stat component removed — hierarchy is now rendered inline in RouteCard */
+/* Stat component removed - hierarchy is now rendered inline in RouteCard */

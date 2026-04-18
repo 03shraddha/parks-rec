@@ -43,7 +43,7 @@ function distSq(ax: number, ay: number, bx: number, by: number): number {
 
 /**
  * Find the nearest road feature to a midpoint coordinate.
- * Uses a simple linear scan — acceptable for server-side use with
+ * Uses a simple linear scan - acceptable for server-side use with
  * ~150k features; for very large datasets consider an R-tree index.
  */
 function findNearestRoad(
@@ -121,8 +121,8 @@ export function scoreRoute(
 
 /**
  * From a list of candidate routes, return:
- *   fastRoute   — shortest travel time
- *   coolRoute   — highest shade score (may be the same route)
+ *   fastRoute   - shortest travel time
+ *   coolRoute   - highest shade score (may be the same route)
  */
 export function pickRoutes(candidates: ScoredRoute[]): {
   fastRoute: ScoredRoute;

@@ -57,7 +57,7 @@ export default function HeatAdvisory({ onDismiss }: HeatAdvisoryProps) {
           </button>
         </div>
         <p className="font-grotesk text-xs leading-relaxed mb-1.5" style={{ color: "#FDE68A" }}>
-          It&apos;s midday in Bengaluru — exposed stretches can reach 42°C.
+          It&apos;s midday in Bengaluru - exposed stretches can reach 42°C.
         </p>
         <p className="font-grotesk text-xs font-semibold" style={{ color: "#FCD34D" }}>
           🌿 The Cool Route is strongly recommended.

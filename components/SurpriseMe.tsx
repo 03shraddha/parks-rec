@@ -15,10 +15,10 @@ const ONE_LINERS: Record<string, string> = {
   "Ulsoor Lake Park":            "Proof that Bengaluru remembers how to be serene.",
   "Sankey Tank":                 "The OG morning-walk circuit before it was cool.",
   "Hesaraghatta Grasslands":    "Where the city ends and the sky decides to stretch.",
-  "Turahalli Forest":            "Bengaluru's secret lung — and an excellent excuse to cancel brunch.",
+  "Turahalli Forest":            "Bengaluru's secret lung - and an excellent excuse to cancel brunch.",
   "Agara Lake":                  "Silicon Valley views, Bengaluru prices, zero traffic.",
   "Bugle Rock Park":             "Ancient boulders judging your screen-time since 3000 BCE.",
-  "Freedom Park":                "History in every corner — and chai right outside.",
+  "Freedom Park":                "History in every corner - and chai right outside.",
   "Kadugodi Tree Park":          "East Bengaluru's quiet reward for surviving the Ring Road.",
   "Bannerghatta Biological Park":"Where the lions are better traffic-managed than on Hosur Road.",
   "JP Nagar Park":               "The neighbourhood park that peaked before the apartments did.",
@@ -32,7 +32,7 @@ const ONE_LINERS: Record<string, string> = {
 // ── Fallback one-liners used when a park has no specific entry ────────────
 const FALLBACK_LINERS = [
   "A green patch the city forgot to pave over.",
-  "Shade, silence, and zero meetings — what more do you need?",
+  "Shade, silence, and zero meetings - what more do you need?",
   "Your steps won't count unless you actually take them.",
   "Bengaluru's answer to 'but where's the nature?'",
   "One bus, two autos, and a good excuse for fresh air.",
@@ -167,7 +167,7 @@ export default function SurpriseMe({ onFlyTo }: SurpriseMeProps) {
       try {
         localStorage.setItem(VISITED_KEY, JSON.stringify([...visited]));
       } catch {
-        // localStorage may be unavailable in some browser contexts — ignore
+        // localStorage may be unavailable in some browser contexts - ignore
       }
 
       // Fly the map

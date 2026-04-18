@@ -10,6 +10,7 @@ interface EventFeature {
 
 interface EventsPanelProps {
   events: EventFeature[];
+  isLoading?: boolean;
   onEventSelect: (lng: number, lat: number, info: EventInfo) => void;
   onClose: () => void;
   onLocationSearch?: (location: string) => void;
@@ -41,7 +42,7 @@ const TIMING_COLORS: Record<string, string> = {
   Upcoming: "#60A5FA",
 };
 
-export default function EventsPanel({ events, onEventSelect, onClose, onLocationSearch }: EventsPanelProps) {
+export default function EventsPanel({ events, isLoading, onEventSelect, onClose, onLocationSearch }: EventsPanelProps) {
   const [locationQuery, setLocationQuery] = useState("");
 
   const handleLocationSubmit = (e: React.FormEvent) => {
@@ -73,7 +74,7 @@ export default function EventsPanel({ events, onEventSelect, onClose, onLocation
             🎉 Events Near You
           </p>
           <p className="font-mono-ui uppercase tracking-[0.10em]" style={{ fontSize: "8px", color: "var(--text-disabled)", marginTop: "1px" }}>
-            {events.length} events · Bengaluru
+            {isLoading ? "Loading..." : `${events.length} events`} · Bengaluru
           </p>
         </div>
         <button
@@ -125,9 +126,19 @@ export default function EventsPanel({ events, onEventSelect, onClose, onLocation
 
       {/* Scrollable event list */}
       <div className="overflow-y-auto flex-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(244,114,182,0.3) transparent" }}>
-        {events.length === 0 ? (
+        {isLoading ? (
+          <div className="px-4 py-4 flex flex-col gap-3">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="flex flex-col gap-1.5 animate-pulse">
+                <div className="h-2 w-16 rounded-full" style={{ background: "rgba(244,114,182,0.18)" }} />
+                <div className="h-3 w-full rounded" style={{ background: "rgba(148,163,184,0.12)" }} />
+                <div className="h-2 w-24 rounded" style={{ background: "rgba(148,163,184,0.08)" }} />
+              </div>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
           <div className="px-4 py-6 text-center">
-            <p className="font-grotesk text-xs" style={{ color: "var(--text-muted)" }}>No events loaded yet.</p>
+            <p className="font-grotesk text-xs" style={{ color: "var(--text-muted)" }}>No events found in this area.</p>
           </div>
         ) : (
           events.map((feature, i) => {

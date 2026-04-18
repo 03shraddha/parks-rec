@@ -9,7 +9,7 @@ interface OnboardingOverlayProps {
 const STEPS = [
   {
     title: "Set your start",
-    description: 'Tap "Set start" and search for your current location — or drop a pin anywhere on the map.',
+    description: 'Tap "Set start" and search for your current location - or drop a pin anywhere on the map.',
     icon: "📍",
     color: "var(--jade-light)",
     glow: "var(--jade-glow)",
@@ -27,7 +27,7 @@ const STEPS = [
   },
   {
     title: "Compare your routes",
-    description: "We'll find you two routes — the fastest and the coolest. Pick the shaded one to beat the Bengaluru heat.",
+    description: "We'll find you two routes - the fastest and the coolest. Pick the shaded one to beat the Bengaluru heat.",
     icon: "🌿",
     color: "var(--violet-light)",
     glow: "var(--violet-glow)",
@@ -47,13 +47,13 @@ export default function OnboardingOverlay({ onClose }: OnboardingOverlayProps) {
   };
 
   return (
-    // Full-screen backdrop — click outside card to dismiss
+    // Full-screen backdrop - click outside card to dismiss
     <div
       className="absolute inset-0 z-50 flex items-end md:items-center justify-center pb-6 md:pb-0"
       style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)" }}
       onClick={handleClose}
     >
-      {/* Card — stop propagation so clicks inside don't dismiss */}
+      {/* Card - stop propagation so clicks inside don't dismiss */}
       <div
         className="w-[calc(100%-2rem)] max-w-sm rounded-2xl overflow-hidden pointer-events-auto"
         style={{

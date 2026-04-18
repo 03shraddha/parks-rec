@@ -43,7 +43,7 @@ const LAYERS: {
     color: "linear-gradient(135deg, #06B6D4, #0284C7)",
     glow: "rgba(6, 182, 212, 0.50)",
     border: "rgba(103, 232, 249, 0.60)",
-    tooltip: "Lakes and ponds — cooler microclimates nearby.",
+    tooltip: "Lakes and ponds - cooler microclimates nearby.",
   },
   {
     key: "busStops",
@@ -81,7 +81,7 @@ export default function LayerControls({ visible, onChange }: LayerControlsProps)
     <>
       <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
       <div className="flex flex-col gap-1.5 pointer-events-auto">
-        {/* Section label — TERTIARY: Space Mono ALL CAPS, edge-anchored, de-emphasised */}
+        {/* Section label - TERTIARY: Space Mono ALL CAPS, edge-anchored, de-emphasised */}
         <p
           className="font-mono-ui text-[10px] uppercase tracking-[0.18em] px-1 mb-0.5"
           style={{ color: "var(--text-disabled)" }}
