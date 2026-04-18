@@ -52,30 +52,26 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 // ── Geocoding helper ─────────────────────────────────────────────────────────
 
 /**
- * Converts an address string to [lng, lat] using the MapTiler Geocoding API.
+ * Converts an address string to [lng, lat] using the Mappls Geocoding API.
  * Returns null if the address can't be resolved so the event can be skipped.
  */
-async function geocodeAddress(
-  address: string,
-  maptilerKey: string
-): Promise<[number, number] | null> {
-  const encoded = encodeURIComponent(address);
-  // Bias results toward central Bengaluru
-  const url =
-    `https://api.maptiler.com/geocoding/${encoded}.json` +
-    `?key=${maptilerKey}&proximity=77.5946,12.9716&language=en&limit=1`;
+async function geocodeAddress(address: string): Promise<[number, number] | null> {
+  const key = process.env.NEXT_PUBLIC_MAPPLS_KEY;
+  if (!key) return null;
+
+  const encoded = encodeURIComponent(address + " Bengaluru");
+  const url = `https://atlas.mapmyindia.com/api/places/geocode?address=${encoded}&access_token=${key}`;
 
   try {
     const res = await fetch(url);
     if (!res.ok) return null;
 
     const json = await res.json();
-    const center: [number, number] | undefined = json?.features?.[0]?.center;
-    if (!center || center.length < 2) return null;
+    const result = (json.copResults ?? [])[0];
+    if (!result?.longitude || !result?.latitude) return null;
 
-    return center; // [lng, lat]
+    return [parseFloat(result.longitude), parseFloat(result.latitude)];
   } catch {
-    // Network or parse error - skip this event
     return null;
   }
 }
@@ -101,8 +97,6 @@ export async function GET(request: Request): Promise<NextResponse> {
       return NextResponse.json({ type: "FeatureCollection", features: [] });
     }
   }
-
-  const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "";
 
   // Return cached response if still fresh (keyed by location)
   const cached = cacheMap.get(locationParam);
@@ -161,7 +155,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       // We need an address to geocode; skip events without one
       if (!address) return;
 
-      const coords = await geocodeAddress(address, maptilerKey);
+      const coords = await geocodeAddress(address);
       if (!coords) return; // geocoding failed - skip silently
 
       // Parse date and time out of SerpApi's date fields.
