@@ -80,6 +80,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
         border: "1px solid rgba(244, 114, 182, 0.18)",
         boxShadow: "0 0 16px rgba(244,114,182,0.25), 0 12px 40px rgba(0,0,0,0.6)",
         maxHeight: "70vh",
+        overscrollBehavior: "contain",
         animation: "slide-up 0.28s cubic-bezier(0.16,1,0.3,1)",
       }}
     >
@@ -209,7 +210,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
                   {nearRoute && (
                     <span
                       className="font-mono-ui uppercase tracking-[0.10em] px-1.5 py-0.5 rounded-full"
-                      style={{ fontSize: "8px", background: "rgba(74,222,128,0.18)", border: "1px solid rgba(74,222,128,0.35)", color: "#4ADE80" }}
+                      style={{ fontSize: "8px", background: "rgba(74,222,128,0.18)", border: "1px solid rgba(74,222,128,0.35)", color: "#4ADE80", animation: "pulse 2s ease-in-out infinite" }}
                     >
                       Along route
                     </span>
@@ -217,7 +218,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
                 </div>
 
                 {/* Event title */}
-                <p className="font-grotesk font-semibold text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
+                <p className="font-grotesk font-semibold text-[13px] leading-snug" style={{ color: "var(--text-primary)" }}>
                   {info.title}
                 </p>
 
@@ -240,7 +241,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
       </div>
 
       {/* Footer hint */}
-      <div className="px-4 py-2 shrink-0" style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }}>
+      <div className="px-4 shrink-0" style={{ borderTop: "1px solid rgba(148,163,184,0.08)", paddingTop: "8px", paddingBottom: "max(8px, env(safe-area-inset-bottom, 8px))" }}>
         <p className="font-mono-ui uppercase tracking-[0.08em] text-center" style={{ fontSize: "8px", color: "var(--text-disabled)" }}>
           Tap an event to zoom in on the map
         </p>

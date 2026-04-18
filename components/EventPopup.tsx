@@ -17,7 +17,7 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
 
   return (
     <div
-      className="pointer-events-auto rounded-2xl overflow-hidden w-64"
+      className="pointer-events-auto rounded-2xl overflow-hidden w-72 max-w-[calc(100vw-2rem)]"
       style={{
         background: "var(--bg-card)",
         backdropFilter: "blur(20px) saturate(180%)",
@@ -95,8 +95,8 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
       {/* PRIMARY: event title - Zen Kaku Gothic for anime display feel */}
       <div className="px-4 pb-3">
         <h3
-          className="font-zen font-bold text-lg leading-snug"
-          style={{ color: "var(--text-display)", textShadow: `0 0 16px ${pinkGlow}` }}
+          className="font-zen font-bold text-xl leading-snug"
+          style={{ color: "var(--text-display)", textShadow: `0 0 16px ${pinkGlow}`, letterSpacing: "-0.01em" }}
         >
           {info.title}
         </h3>
@@ -153,6 +153,37 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
               }}
             >
               Get Tickets
+            </a>
+          </div>
+        </>
+      )}
+      {/* "Learn More" button - shown when more_info_url is present */}
+      {info.more_info_url && (
+        <>
+          <div style={{ borderTop: "1px solid rgba(148,163,184,0.08)" }} />
+          <div className="px-4 py-3">
+            <a
+              href={info.more_info_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-2.5 rounded-xl font-grotesk text-sm font-bold text-center transition-all duration-200"
+              style={{
+                background: "rgba(139,92,246,0.15)",
+                color: "#A78BFA",
+                border: "1px solid rgba(139,92,246,0.35)",
+                letterSpacing: "0.03em",
+                textDecoration: "none",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = "rgba(139,92,246,0.25)";
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 0 16px rgba(139,92,246,0.35)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = "rgba(139,92,246,0.15)";
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none";
+              }}
+            >
+              Learn More
             </a>
           </div>
         </>

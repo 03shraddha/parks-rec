@@ -51,7 +51,7 @@ export default function SegmentPopup({ info, onClose }: SegmentPopupProps) {
 
   return (
     <div
-      className="pointer-events-auto rounded-2xl overflow-hidden w-64"
+      className="pointer-events-auto rounded-2xl overflow-hidden w-72 max-w-[calc(100vw-2rem)]"
       style={{
         background: "var(--bg-card)",
         backdropFilter: "blur(20px) saturate(180%)",

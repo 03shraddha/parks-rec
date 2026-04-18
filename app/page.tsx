@@ -214,7 +214,7 @@ export default function HomePage() {
       <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-4 pointer-events-none z-10">
         {/* Brand */}
         <div
-          className="pointer-events-auto anime-panel glow-violet rounded-2xl px-4 py-2.5 flex items-center gap-3"
+          className="pointer-events-auto anime-panel glow-violet rounded-2xl px-4 py-2.5 flex items-center gap-3 overflow-hidden"
           style={{ minWidth: 0 }}
         >
           {/* Animated nature icon */}
@@ -237,12 +237,13 @@ export default function HomePage() {
             </p>
             {/* TERTIARY - Space Mono ALL CAPS, pushed visually to background */}
             <p
-              className="font-mono-ui leading-tight"
+              className="font-mono-ui leading-tight truncate"
               style={{
                 fontSize: "9px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "var(--text-disabled)",
+                maxWidth: "150px",
               }}
             >
               Without melting · Bengaluru
@@ -365,7 +366,7 @@ export default function HomePage() {
       )}
 
       {/* ── Events panel - mobile bottom sheet, desktop sidebar ── */}
-      {visibleLayers.events && !eventInfo && (
+      {visibleLayers.events && !eventInfo && !activeNavRoute && (
         <div
           className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none md:top-20 md:bottom-auto md:right-4 md:left-auto md:w-72"
         >
@@ -621,7 +622,7 @@ function BottomSheet({
           }}
         >
           {/* Layer pills - horizontal scroll, no scrollbar */}
-          <div className="flex gap-2 px-3 pt-3 pb-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+          <div className="flex gap-2 px-3 pt-3 pb-2 overflow-x-auto" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
             {LAYER_PILLS.map(({ key, icon, label, color, glow, border }) => {
               const on = visibleLayers[key];
               return (
@@ -680,6 +681,8 @@ function BottomSheet({
           border: "1px solid var(--border-subtle)",
           boxShadow: "0 -4px 32px rgba(0,0,0,0.18)",
           animation: "slide-up 0.25s cubic-bezier(0.16,1,0.3,1)",
+          maxHeight: "85vh",
+          overflowY: "auto",
         }}
       >
         {/* Header row: back + title */}

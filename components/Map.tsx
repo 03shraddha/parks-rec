@@ -39,6 +39,7 @@ export interface EventInfo {
   venue: string;
   address: string;
   ticket_url: string | null;
+  more_info_url: string | null;
   thumbnail: string | null;
   category: string;
   lng?: number;  // coordinate for "get directions" feature

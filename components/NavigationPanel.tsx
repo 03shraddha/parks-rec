@@ -284,7 +284,7 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
       )}
 
       {/* End navigation button */}
-      <div className="px-4 pb-5 pt-2">
+      <div className="px-4 pt-2" style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))" }}>
         <button
           onClick={onExit}
           className="w-full py-4 rounded-2xl font-grotesk text-base font-bold"

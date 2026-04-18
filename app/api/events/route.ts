@@ -17,6 +17,7 @@ interface EventProperties {
   venue: string;
   address: string;
   ticket_url: string | null;
+  more_info_url: string | null;
   thumbnail: string | null;
   category: string;
 }
@@ -190,6 +191,7 @@ export async function GET(request: Request): Promise<NextResponse> {
           venue: event.venue?.name ?? "",
           address,
           ticket_url: event.link ?? null,
+          more_info_url: event.link ?? null,
           thumbnail: event.thumbnail ?? null,
           category,
         },

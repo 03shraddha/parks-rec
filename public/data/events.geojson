@@ -4,12 +4,13 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Sunday Morning Walk — Cubbon Park",
+        "title": "Sunday Morning Walk - Cubbon Park",
         "date": "Every Sunday",
-        "time": "6:00 AM – 8:00 AM",
+        "time": "6:00 AM - 8:00 AM",
         "venue": "Cubbon Park",
         "address": "Kasturba Road, Sampangi Rama Nagar, Bengaluru",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Fitness"
       },
@@ -18,12 +19,13 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Heritage Tree Walk — Lalbagh",
+        "title": "Heritage Tree Walk - Lalbagh",
         "date": "Every Saturday",
-        "time": "7:00 AM – 9:00 AM",
+        "time": "7:00 AM - 9:00 AM",
         "venue": "Lalbagh Botanical Garden",
         "address": "Mavalli, Bengaluru 560004",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Nature"
       },
@@ -34,10 +36,11 @@
       "properties": {
         "title": "Urban Ecology Talk",
         "date": "Saturday, April 12",
-        "time": "4:00 PM – 6:00 PM",
+        "time": "4:00 PM - 6:00 PM",
         "venue": "Bangalore International Centre",
         "address": "4, Dr Rajkumar Road, Rajajinagar, Bengaluru 560010",
         "ticket_url": null,
+        "more_info_url": "https://bangaloreinternationalcentre.org",
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -48,10 +51,11 @@
       "properties": {
         "title": "Parallel Cinema Screening",
         "date": "Friday, April 18",
-        "time": "6:30 PM – 9:00 PM",
+        "time": "6:30 PM - 9:00 PM",
         "venue": "Bangalore International Centre",
         "address": "4, Dr Rajkumar Road, Rajajinagar, Bengaluru 560010",
         "ticket_url": null,
+        "more_info_url": "https://bangaloreinternationalcentre.org",
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -62,10 +66,11 @@
       "properties": {
         "title": "French Cinema Week",
         "date": "Saturday, April 19",
-        "time": "5:00 PM – 8:00 PM",
-        "venue": "Alliance Française de Bangalore",
+        "time": "5:00 PM - 8:00 PM",
+        "venue": "Alliance Francaise de Bangalore",
         "address": "Millers Road, Vasanth Nagar, Bengaluru 560052",
         "ticket_url": null,
+        "more_info_url": "https://afbangalore.org",
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -76,10 +81,11 @@
       "properties": {
         "title": "Language Exchange Meetup",
         "date": "Every last Saturday",
-        "time": "11:00 AM – 1:00 PM",
-        "venue": "Alliance Française de Bangalore",
+        "time": "11:00 AM - 1:00 PM",
+        "venue": "Alliance Francaise de Bangalore",
         "address": "Millers Road, Vasanth Nagar, Bengaluru 560052",
         "ticket_url": null,
+        "more_info_url": "https://afbangalore.org",
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -90,10 +96,11 @@
       "properties": {
         "title": "Contemporary Art Exhibition Opening",
         "date": "Saturday, April 12",
-        "time": "11:00 AM – 6:00 PM",
+        "time": "11:00 AM - 6:00 PM",
         "venue": "National Gallery of Modern Art",
         "address": "49, Palace Road, Bengaluru 560052",
         "ticket_url": null,
+        "more_info_url": "https://ngmaindia.gov.in",
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -104,10 +111,11 @@
       "properties": {
         "title": "Short Film Festival",
         "date": "Saturday, April 26",
-        "time": "3:00 PM – 9:00 PM",
+        "time": "3:00 PM - 9:00 PM",
         "venue": "Jagriti Theatre",
         "address": "Aqueel Plaza, Whitefield Main Road, Bengaluru 560066",
         "ticket_url": null,
+        "more_info_url": "https://jagriti.in",
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -116,12 +124,13 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Metro Art Fair — Open Gallery Day",
+        "title": "Metro Art Fair - Open Gallery Day",
         "date": "Every Sunday",
-        "time": "10:00 AM – 8:00 PM",
+        "time": "10:00 AM - 8:00 PM",
         "venue": "Rangoli Metro Art Center",
         "address": "MG Road Metro Station, Bengaluru 560001",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -132,10 +141,11 @@
       "properties": {
         "title": "Open Studio Saturday",
         "date": "Every Saturday",
-        "time": "10:00 AM – 5:00 PM",
+        "time": "10:00 AM - 5:00 PM",
         "venue": "Karnataka Chitrakala Parishath",
         "address": "Kumara Krupa Road, Bengaluru 560001",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -144,12 +154,13 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Bird Walk — Bannerghatta",
+        "title": "Bird Walk - Bannerghatta",
         "date": "Every Sunday",
-        "time": "6:30 AM – 9:00 AM",
+        "time": "6:30 AM - 9:00 AM",
         "venue": "Bannerghatta Biological Park",
         "address": "Bannerghatta Road, Bengaluru 560083",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Nature"
       },
@@ -160,10 +171,11 @@
       "properties": {
         "title": "Weekend Yoga in the Park",
         "date": "Every Saturday & Sunday",
-        "time": "7:00 AM – 8:30 AM",
-        "venue": "Cubbon Park — Band Stand Lawn",
+        "time": "7:00 AM - 8:30 AM",
+        "venue": "Cubbon Park - Band Stand Lawn",
         "address": "Kasturba Road, Bengaluru 560001",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Fitness"
       },
@@ -174,10 +186,11 @@
       "properties": {
         "title": "Carnatic Evening Concert",
         "date": "Friday, April 25",
-        "time": "6:00 PM – 8:30 PM",
+        "time": "6:00 PM - 8:30 PM",
         "venue": "Indian Institute of World Culture",
         "address": "6/7, Bhawani Singh Road, Basavangudi, Bengaluru 560004",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -188,10 +201,11 @@
       "properties": {
         "title": "Environmental Awareness Walk",
         "date": "Every Sunday",
-        "time": "7:00 AM – 9:00 AM",
+        "time": "7:00 AM - 9:00 AM",
         "venue": "Freedom Park",
         "address": "Prison Road, Sheshadripuram, Bengaluru 560001",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Nature"
       },
@@ -200,12 +214,13 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Photography Walk — Lalbagh Morning",
+        "title": "Photography Walk - Lalbagh Morning",
         "date": "Every first Sunday",
-        "time": "6:00 AM – 8:30 AM",
+        "time": "6:00 AM - 8:30 AM",
         "venue": "Lalbagh Botanical Garden",
         "address": "Mavalli, Bengaluru 560004",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Nature"
       },
@@ -216,10 +231,11 @@
       "properties": {
         "title": "Watercolour Workshop",
         "date": "Saturday, April 19",
-        "time": "10:00 AM – 1:00 PM",
+        "time": "10:00 AM - 1:00 PM",
         "venue": "Karnataka Chitrakala Parishath",
         "address": "Kumara Krupa Road, Bengaluru 560001",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -230,10 +246,11 @@
       "properties": {
         "title": "Stand-up Comedy Open Mic",
         "date": "Friday, April 11",
-        "time": "7:30 PM – 10:00 PM",
+        "time": "7:30 PM - 10:00 PM",
         "venue": "Jagriti Theatre",
         "address": "Aqueel Plaza, Whitefield Main Road, Bengaluru 560066",
         "ticket_url": null,
+        "more_info_url": "https://jagriti.in",
         "thumbnail": null,
         "category": "Cultural"
       },
@@ -242,16 +259,272 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "IISc Open Day — Campus Science Walk",
+        "title": "IISc Open Day - Campus Science Walk",
         "date": "Saturday, April 26",
-        "time": "9:00 AM – 5:00 PM",
+        "time": "9:00 AM - 5:00 PM",
         "venue": "Indian Institute of Science",
         "address": "CV Raman Avenue, Mathikere, Bengaluru 560012",
         "ticket_url": null,
+        "more_info_url": null,
         "thumbnail": null,
         "category": "Cultural"
       },
       "geometry": { "type": "Point", "coordinates": [77.5673, 13.0213] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Sunday Soul Santhe",
+        "date": "Every first Sunday",
+        "time": "10:00 AM - 6:00 PM",
+        "venue": "Palace Grounds",
+        "address": "Palace Grounds, Jayamahal Road, Bengaluru 560080",
+        "ticket_url": null,
+        "more_info_url": "https://www.instagram.com/sundaysoulsante/",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5989, 13.0002] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Cubbon Park Bird Watch",
+        "date": "Every Sunday",
+        "time": "6:30 AM - 8:30 AM",
+        "venue": "Cubbon Park - Seshadri Road Gate",
+        "address": "Seshadri Road, Sampangi Rama Nagar, Bengaluru 560001",
+        "ticket_url": null,
+        "more_info_url": "https://www.bngbirds.com",
+        "thumbnail": null,
+        "category": "Nature"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5940, 12.9780] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Atta Galata Author Talk",
+        "date": "Every Saturday",
+        "time": "5:00 PM - 7:00 PM",
+        "venue": "Atta Galata Bookstore",
+        "address": "19, 100 Feet Road, Koramangala 4th Block, Bengaluru 560034",
+        "ticket_url": null,
+        "more_info_url": "https://attagalata.com",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6275, 12.9352] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "INTACH Heritage Walk - Malleswaram",
+        "date": "Every second Sunday",
+        "time": "7:00 AM - 10:00 AM",
+        "venue": "Malleswaram Circle",
+        "address": "18th Cross, Malleswaram, Bengaluru 560055",
+        "ticket_url": null,
+        "more_info_url": "https://www.intachbangalore.org",
+        "thumbnail": null,
+        "category": "Heritage"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5637, 13.0034] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bangalore Nature Walk - Kaikondrahalli Lake",
+        "date": "Every Sunday",
+        "time": "6:30 AM - 8:30 AM",
+        "venue": "Kaikondrahalli Lake",
+        "address": "Sarjapur Road, Carmelaram, Bengaluru 560035",
+        "ticket_url": null,
+        "more_info_url": "https://www.meetup.com/bangalore-nature-walks/",
+        "thumbnail": null,
+        "category": "Nature"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6718, 12.9238] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Saturday Cycling Ride - Bengaluru Cycling Club",
+        "date": "Every Saturday",
+        "time": "6:00 AM - 9:00 AM",
+        "venue": "Cubbon Park - Main Gate",
+        "address": "Kasturba Road, Bengaluru 560001",
+        "ticket_url": null,
+        "more_info_url": "https://www.facebook.com/BengaluruCyclingClub/",
+        "thumbnail": null,
+        "category": "Cycling"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5936, 12.9762] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Indiranagar Farmers Market",
+        "date": "Every last Sunday",
+        "time": "8:00 AM - 1:00 PM",
+        "venue": "Defence Colony Park",
+        "address": "Defence Colony, Indiranagar, Bengaluru 560038",
+        "ticket_url": null,
+        "more_info_url": "https://www.instagram.com/farmers_market_india/",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6401, 12.9712] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "ISKCON Sunday Feast & Kirtan",
+        "date": "Every Sunday",
+        "time": "4:00 PM - 8:00 PM",
+        "venue": "ISKCON Temple Bengaluru",
+        "address": "Hare Krishna Hill, Chord Road, Rajajinagar, Bengaluru 560010",
+        "ticket_url": null,
+        "more_info_url": "https://iskconbangalore.org",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5536, 13.0100] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Cooke Town Heritage Walk",
+        "date": "Every first Saturday",
+        "time": "8:00 AM - 11:00 AM",
+        "venue": "Cooke Town - St. Mark's Area",
+        "address": "Cooke Town, Bengaluru 560084",
+        "ticket_url": null,
+        "more_info_url": "https://www.bangalorewalks.com",
+        "thumbnail": null,
+        "category": "Heritage"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6113, 12.9850] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Suchitra Film Society Screening",
+        "date": "Every Saturday",
+        "time": "3:00 PM - 6:30 PM",
+        "venue": "Suchitra Film Society",
+        "address": "Chord Road, Rajajinagar, Bengaluru 560010",
+        "ticket_url": null,
+        "more_info_url": "http://www.suchitracinesociety.org",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5513, 13.0089] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Open Mic Night - Church Street Social",
+        "date": "Every Friday",
+        "time": "7:30 PM - 10:30 PM",
+        "venue": "Church Street Social",
+        "address": "46/1, Church Street, Ashok Nagar, Bengaluru 560001",
+        "ticket_url": null,
+        "more_info_url": "https://www.instagram.com/socialoffline/",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6064, 12.9727] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Lalbagh Sunday Flower Market",
+        "date": "Every Sunday",
+        "time": "7:00 AM - 12:00 PM",
+        "venue": "Lalbagh Botanical Garden - West Gate",
+        "address": "West Gate, Lalbagh Road, Bengaluru 560004",
+        "ticket_url": null,
+        "more_info_url": null,
+        "thumbnail": null,
+        "category": "Nature"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5831, 12.9500] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bangalore Photo Walk",
+        "date": "Every second Sunday",
+        "time": "7:00 AM - 10:00 AM",
+        "venue": "MG Road / Cubbon Park",
+        "address": "MG Road, Bengaluru 560001",
+        "ticket_url": null,
+        "more_info_url": "https://www.meetup.com/bangalore-photo-walk/",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6063, 12.9748] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Jayanagar 4th Block Lake Morning Walk",
+        "date": "Every day",
+        "time": "6:00 AM - 7:30 AM",
+        "venue": "Jayanagar 4th Block Lake",
+        "address": "4th Block, Jayanagar, Bengaluru 560011",
+        "ticket_url": null,
+        "more_info_url": null,
+        "thumbnail": null,
+        "category": "Fitness"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5882, 12.9278] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "HSR Layout Lake Jogging Group",
+        "date": "Every Saturday & Sunday",
+        "time": "6:00 AM - 7:30 AM",
+        "venue": "HSR BDA Complex Lake",
+        "address": "27th Main, HSR Layout, Bengaluru 560102",
+        "ticket_url": null,
+        "more_info_url": null,
+        "thumbnail": null,
+        "category": "Fitness"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6379, 12.9129] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "HasGeek Tech Community Meetup",
+        "date": "Every Sunday",
+        "time": "2:00 PM - 6:00 PM",
+        "venue": "Juspay Office, Koramangala",
+        "address": "Koramangala 1st Block, Bengaluru 560034",
+        "ticket_url": null,
+        "more_info_url": "https://hasgeek.com",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.6459, 12.9342] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Karaga Festival Procession",
+        "date": "Saturday, April 12",
+        "time": "9:00 PM onwards",
+        "venue": "Dharmaraya Swamy Temple",
+        "address": "Avenue Road, Cottonpet, Bengaluru 560053",
+        "ticket_url": null,
+        "more_info_url": "https://en.wikipedia.org/wiki/Karaga",
+        "thumbnail": null,
+        "category": "Cultural"
+      },
+      "geometry": { "type": "Point", "coordinates": [77.5749, 12.9647] }
     }
   ]
 }

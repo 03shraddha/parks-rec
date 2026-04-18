@@ -22,7 +22,7 @@ export default function TrailPopup({ info, onClose }: TrailPopupProps) {
 
   return (
     <div
-      className="pointer-events-auto rounded-2xl overflow-hidden w-56"
+      className="pointer-events-auto rounded-2xl overflow-hidden w-64 max-w-[calc(100vw-2rem)]"
       style={{
         background: "var(--bg-card)",
         backdropFilter: "blur(20px) saturate(180%)",
