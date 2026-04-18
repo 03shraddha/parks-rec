@@ -65,6 +65,8 @@ export interface MapHandle {
   flyTo(lng: number, lat: number, zoom?: number): void;
   updateLivePosition(lng: number, lat: number): void;
   clearLivePosition(): void;
+  followUser(lng: number, lat: number, bearing: number): void;
+  stopFollowing(): void;
 }
 
 export interface LayerVisibility {
@@ -131,6 +133,7 @@ export default function Map({
   // Track whether the map has been initialised yet (skip the first theme effect run)
   const mapReadyRef = useRef(false);
   const liveMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const isFollowingRef = useRef(false);
 
   // ── Imperative handle - exposes flyTo and live position to parent via ref ──
   useImperativeHandle(ref, () => ({
@@ -153,6 +156,36 @@ export default function Map({
     clearLivePosition() {
       liveMarkerRef.current?.remove();
       liveMarkerRef.current = null;
+      isFollowingRef.current = false;
+      mapRef.current?.easeTo({ pitch: 0, bearing: 0, zoom: 14, duration: 800 });
+    },
+    followUser(lng: number, lat: number, bearing: number) {
+      const map = mapRef.current;
+      if (!map) return;
+      isFollowingRef.current = true;
+      // Update or create the live position marker
+      if (!liveMarkerRef.current) {
+        const el = createLiveDotEl();
+        liveMarkerRef.current = new maplibregl.Marker({ element: el, anchor: "center" })
+          .setLngLat([lng, lat])
+          .addTo(map);
+      } else {
+        liveMarkerRef.current.setLngLat([lng, lat]);
+      }
+      // Rotate and follow camera - zoom 17, bearing matches heading, slight tilt like Google Maps navigation
+      map.easeTo({
+        center: [lng, lat],
+        bearing: bearing,
+        zoom: 17,
+        pitch: 40,
+        duration: 800,
+        easing: (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+      });
+    },
+    stopFollowing() {
+      isFollowingRef.current = false;
+      // Reset camera pitch and bearing gently when navigation ends
+      mapRef.current?.easeTo({ pitch: 0, bearing: 0, duration: 600 });
     },
   }));
 

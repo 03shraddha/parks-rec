@@ -9,6 +9,7 @@ interface NavigationPanelProps {
   routeType: "cool" | "fast";
   onExit: () => void;
   onPositionUpdate?: (coord: Coordinate) => void;
+  onNavUpdate?: (coord: Coordinate, bearing: number) => void;
   onStepChange?: (stepIndex: number) => void;
 }
 
@@ -58,10 +59,11 @@ function haversineDistance(a: Coordinate, b: Coordinate): number {
   return 2 * R * Math.atan2(Math.sqrt(sin2), Math.sqrt(1 - sin2));
 }
 
-export default function NavigationPanel({ route, routeType, onExit, onPositionUpdate, onStepChange }: NavigationPanelProps) {
+export default function NavigationPanel({ route, routeType, onExit, onPositionUpdate, onNavUpdate, onStepChange }: NavigationPanelProps) {
   const [stepIdx, setStepIdx] = useState(0);
   const [distToNext, setDistToNext] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [heading, setHeading] = useState<number | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const routeCoords = route.points.coordinates;
   const instructions: GHInstruction[] = route.instructions ?? [];
@@ -92,7 +94,11 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const coord: Coordinate = { lng: pos.coords.longitude, lat: pos.coords.latitude };
+        // heading is degrees from north (0-360), or null if unavailable on the device
+        const hdg = pos.coords.heading ?? 0;
+        setHeading(pos.coords.heading);
         onPositionUpdate?.(coord);
+        onNavUpdate?.(coord, hdg);
         advanceStep(coord);
       },
       () => {},
@@ -101,7 +107,7 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
     return () => {
       if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
     };
-  }, [advanceStep, onPositionUpdate]);
+  }, [advanceStep, onPositionUpdate, onNavUpdate]);
 
   const current = instructions[stepIdx];
   const next = instructions[stepIdx + 1];
@@ -152,7 +158,7 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
           <div className="flex-1 min-w-0">
             {/* Distance to next turn */}
             {distToNext !== null && (
-              <p className="font-zen font-black text-3xl leading-none" style={{ color: accentColor }}>
+              <p className="font-zen font-black text-4xl leading-none" style={{ color: accentColor }}>
                 {formatDist(distToNext)}
               </p>
             )}
@@ -170,7 +176,7 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
 
           {/* Collapse/expand toggle */}
           <button
-            className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-sm"
+            className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm"
             style={{ background: "rgba(148,163,184,0.08)", color: "var(--text-muted)" }}
             onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
           >
@@ -193,6 +199,49 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
           </span>
         </div>
       </div>
+
+      {/* Progress bar - how far through the route the user is */}
+      <div className="px-5 pb-1">
+        <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(148,163,184,0.1)" }}>
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${instructions.length > 0 ? (stepIdx / instructions.length) * 100 : 0}%`,
+              background: accentColor,
+              boxShadow: `0 0 6px ${accentGlow}`,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Compass indicator - only show when heading is available */}
+      {heading !== null && heading > 0 && (
+        <div className="flex items-center gap-2 px-5 pb-2">
+          <div
+            className="w-5 h-5 rounded-full flex items-center justify-center text-[10px]"
+            style={{
+              background: `${accentColor}18`,
+              border: `1px solid ${accentColor}33`,
+              transform: `rotate(${heading}deg)`,
+              transition: "transform 0.5s ease",
+              color: accentColor,
+            }}
+          >
+            &#9650;
+          </div>
+          <span className="font-mono-ui text-[10px] uppercase tracking-[.10em]" style={{ color: "var(--text-disabled)" }}>
+            {Math.round(heading)}{"\u00b0"} heading
+          </span>
+        </div>
+      )}
+
+      {/* Arrival celebration state */}
+      {isArriving && (
+        <div className="px-5 py-4 text-center">
+          <p className="font-zen text-2xl font-black" style={{ color: accentColor }}>You arrived!</p>
+          <p className="font-grotesk text-sm mt-1" style={{ color: "var(--text-muted)" }}>Great walk!</p>
+        </div>
+      )}
 
       {/* Expandable step list */}
       {expanded && (
@@ -238,7 +287,7 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
       <div className="px-4 pb-5 pt-2">
         <button
           onClick={onExit}
-          className="w-full py-3.5 rounded-2xl font-grotesk text-sm font-bold"
+          className="w-full py-4 rounded-2xl font-grotesk text-base font-bold"
           style={{
             background: "rgba(248,113,113,0.12)",
             color: "#F87171",

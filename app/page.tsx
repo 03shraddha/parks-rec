@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import SegmentPopup from "@/components/SegmentPopup";
 import EventPopup from "@/components/EventPopup";
 import TrailPopup from "@/components/TrailPopup";
@@ -75,6 +75,13 @@ export default function HomePage() {
   const [coolRoute, setCoolRoute] = useState<ScoredRoute | null>(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
+
+  // ── Route coords for "Along route" event highlighting ────────────────────
+  const routeCoords = useMemo<[number, number][] | null>(() => {
+    const r = coolRoute ?? fastRoute;
+    if (!r) return null;
+    return r.points.coordinates;
+  }, [coolRoute, fastRoute]);
 
   // ── Segment popup ────────────────────────────────────────────────────────
   const [segmentInfo, setSegmentInfo] = useState<SegmentInfo | null>(null);
@@ -357,9 +364,11 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Events side panel - shows as soon as events layer is toggled on ── */}
+      {/* ── Events panel - mobile bottom sheet, desktop sidebar ── */}
       {visibleLayers.events && !eventInfo && (
-        <div className="absolute top-20 right-4 z-20 pointer-events-none">
+        <div
+          className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none md:top-20 md:bottom-auto md:right-4 md:left-auto md:w-72"
+        >
           <EventsPanel
             events={eventsList}
             isLoading={eventsLoading}
@@ -377,6 +386,7 @@ export default function HomePage() {
               setEventsList([]);
               setEventsLoading(true);
             }}
+            routeCoords={routeCoords ?? undefined}
           />
         </div>
       )}
@@ -418,11 +428,15 @@ export default function HomePage() {
           route={activeNavRoute.route}
           routeType={activeNavRoute.type}
           onExit={() => {
+            mapHandleRef.current?.stopFollowing();
             mapHandleRef.current?.clearLivePosition();
             setActiveNavRoute(null);
           }}
           onPositionUpdate={(coord) => {
             mapHandleRef.current?.updateLivePosition(coord.lng, coord.lat);
+          }}
+          onNavUpdate={(coord, bearing) => {
+            mapHandleRef.current?.followUser(coord.lng, coord.lat, bearing);
           }}
         />
       )}

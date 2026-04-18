@@ -14,6 +14,7 @@ interface EventsPanelProps {
   onEventSelect: (lng: number, lat: number, info: EventInfo) => void;
   onClose: () => void;
   onLocationSearch?: (location: string) => void;
+  routeCoords?: [number, number][];
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -42,7 +43,26 @@ const TIMING_COLORS: Record<string, string> = {
   Upcoming: "#60A5FA",
 };
 
-export default function EventsPanel({ events, isLoading, onEventSelect, onClose, onLocationSearch }: EventsPanelProps) {
+// Check if an event coordinate is within thresholdM metres of any route segment
+function isNearRoute(eventCoord: [number, number], routeCoords: [number, number][], thresholdM = 600): boolean {
+  const [eLng, eLat] = eventCoord;
+  for (let i = 0; i < routeCoords.length - 1; i++) {
+    const [ax, ay] = routeCoords[i];
+    const [bx, by] = routeCoords[i + 1];
+    const dx = bx - ax, dy = by - ay;
+    const lenSq = dx * dx + dy * dy;
+    // Avoid divide-by-zero for zero-length segments
+    const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1, ((eLng - ax) * dx + (eLat - ay) * dy) / lenSq));
+    const projLng = ax + t * dx, projLat = ay + t * dy;
+    const dLat = (eLat - projLat) * Math.PI / 180;
+    const dLng = (eLng - projLng) * Math.PI / 180;
+    const distM = Math.sqrt(dLat * dLat + dLng * dLng) * 111320;
+    if (distM < thresholdM) return true;
+  }
+  return false;
+}
+
+export default function EventsPanel({ events, isLoading, onEventSelect, onClose, onLocationSearch, routeCoords }: EventsPanelProps) {
   const [locationQuery, setLocationQuery] = useState("");
 
   const handleLocationSubmit = (e: React.FormEvent) => {
@@ -53,25 +73,32 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
 
   return (
     <div
-      className="pointer-events-auto rounded-2xl overflow-hidden flex flex-col"
+      className="pointer-events-auto w-full md:w-72 flex flex-col events-panel-sheet"
       style={{
         background: "var(--bg-card)",
         backdropFilter: "blur(20px) saturate(180%)",
         border: "1px solid rgba(244, 114, 182, 0.18)",
         boxShadow: "0 0 16px rgba(244,114,182,0.25), 0 12px 40px rgba(0,0,0,0.6)",
-        width: "260px",
-        maxHeight: "480px",
+        maxHeight: "70vh",
         animation: "slide-up 0.28s cubic-bezier(0.16,1,0.3,1)",
       }}
     >
-      {/* Pink top accent */}
-      <div className="h-0.5 w-full shrink-0" style={{ background: "linear-gradient(90deg, #F472B6, #EC4899)" }} />
+      {/* Drag handle - mobile only */}
+      <div className="flex justify-center pt-3 pb-1 shrink-0 md:hidden">
+        <div
+          className="w-10 h-1 rounded-full"
+          style={{ background: "rgba(148,163,184,0.35)" }}
+        />
+      </div>
+
+      {/* Pink top accent - visible on desktop, hidden on mobile (drag handle takes that space) */}
+      <div className="h-0.5 w-full shrink-0 hidden md:block" style={{ background: "linear-gradient(90deg, #F472B6, #EC4899)" }} />
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2.5 shrink-0" style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
         <div>
           <p className="font-grotesk font-bold text-sm" style={{ color: "var(--text-display)" }}>
-            🎉 Events Near You
+            Events Near You
           </p>
           <p className="font-mono-ui uppercase tracking-[0.10em]" style={{ fontSize: "8px", color: "var(--text-disabled)", marginTop: "1px" }}>
             {isLoading ? "Loading..." : `${events.length} events`} · Bengaluru
@@ -80,7 +107,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
         <button
           onClick={onClose}
           aria-label="Close events panel"
-          className="w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-all duration-150"
+          className="w-12 h-12 rounded-lg flex items-center justify-center text-xs transition-all duration-150"
           style={{
             background: "rgba(148,163,184,0.08)",
             border: "1px solid var(--border-subtle)",
@@ -113,7 +140,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
               type="text"
               value={locationQuery}
               onChange={(e) => setLocationQuery(e.target.value)}
-              placeholder="Search near neighbourhood…"
+              placeholder="Search near neighbourhood..."
               className="flex-1 bg-transparent text-xs outline-none min-w-0 font-grotesk"
               style={{ color: "var(--text-primary)" }}
             />
@@ -147,6 +174,10 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
             const catColor = CATEGORY_COLORS[info.category] ?? "#F472B6";
             const timing = getEventTiming(info.date);
             const timingColor = TIMING_COLORS[timing];
+            // Check if event is along the active route
+            const nearRoute = routeCoords
+              ? isNearRoute([lng, lat], routeCoords)
+              : false;
 
             return (
               <button
@@ -156,11 +187,12 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
                 style={{
                   borderBottom: i < events.length - 1 ? "1px solid rgba(148,163,184,0.07)" : "none",
                   background: "transparent",
+                  minHeight: "48px",
                 }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(244,114,182,0.06)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
               >
-                {/* Top row: category badge + timing badge */}
+                {/* Top row: category badge + timing badge + along-route badge */}
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span
                     className="font-mono-ui uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full"
@@ -174,6 +206,14 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
                   >
                     {timing}
                   </span>
+                  {nearRoute && (
+                    <span
+                      className="font-mono-ui uppercase tracking-[0.10em] px-1.5 py-0.5 rounded-full"
+                      style={{ fontSize: "8px", background: "rgba(74,222,128,0.18)", border: "1px solid rgba(74,222,128,0.35)", color: "#4ADE80" }}
+                    >
+                      Along route
+                    </span>
+                  )}
                 </div>
 
                 {/* Event title */}

@@ -166,6 +166,16 @@ html, body, #__next {
 /* Legacy alias - kept so existing className uses still compile */
 .font-syne { font-family: 'M PLUS Rounded 1c', sans-serif; }
 
+/* EventsPanel: mobile = bottom sheet (rounded top only), desktop = card (all corners) */
+.events-panel-sheet {
+  border-radius: 24px 24px 0 0;
+}
+@media (min-width: 768px) {
+  .events-panel-sheet {
+    border-radius: 16px;
+  }
+}
+
 /* ── Design system typography helpers ─────────────────────────────────── */
 
 /* Primary body / subheading font - anime-style rounded */

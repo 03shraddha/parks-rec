@@ -23,11 +23,36 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
         backdropFilter: "blur(20px) saturate(180%)",
         border: "1px solid rgba(244, 114, 182, 0.20)",
         boxShadow: `0 0 16px ${pinkGlow}, 0 12px 40px rgba(0,0,0,0.65)`,
-        animation: "slide-up 0.28s cubic-bezier(0.16,1,0.3,1)",
+        // Spring bounce - more anime feel
+        animation: "slide-up 0.32s cubic-bezier(0.34,1.56,0.64,1)",
       }}
     >
-      {/* Pink top accent line */}
-      <div className="h-0.5 w-full" style={{ background: pinkGradient }} />
+      {/* Thumbnail image (shown when available) */}
+      {info.thumbnail && (
+        <div className="relative w-full overflow-hidden" style={{ maxHeight: "120px", borderRadius: "16px 16px 0 0" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={info.thumbnail}
+            alt={info.title}
+            className="w-full object-cover"
+            style={{ maxHeight: "120px", display: "block" }}
+          />
+          {/* Gradient overlay fading to bg-card at bottom */}
+          <div
+            className="absolute inset-x-0 bottom-0"
+            style={{
+              height: "48px",
+              background: "linear-gradient(to bottom, transparent, var(--bg-card))",
+              pointerEvents: "none",
+            }}
+          />
+        </div>
+      )}
+
+      {/* Pink top accent line - only when no thumbnail */}
+      {!info.thumbnail && (
+        <div className="h-0.5 w-full" style={{ background: pinkGradient }} />
+      )}
 
       {/* Header row - category badge + close button */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2 gap-2">
@@ -44,11 +69,11 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
           {info.category}
         </span>
 
-        {/* Close button */}
+        {/* Close button - 48px tap target */}
         <button
           onClick={onClose}
           aria-label="Close"
-          className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-all duration-150"
+          className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-xs transition-all duration-150"
           style={{
             background: "rgba(148,163,184,0.08)",
             border: "1px solid var(--border-subtle)",
@@ -67,10 +92,10 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
         </button>
       </div>
 
-      {/* PRIMARY: event title - the visual anchor of this popup */}
+      {/* PRIMARY: event title - Zen Kaku Gothic for anime display feel */}
       <div className="px-4 pb-3">
         <h3
-          className="font-grotesk font-bold text-lg leading-snug"
+          className="font-zen font-bold text-lg leading-snug"
           style={{ color: "var(--text-display)", textShadow: `0 0 16px ${pinkGlow}` }}
         >
           {info.title}
@@ -127,7 +152,7 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
                   `0 0 16px ${pinkGlow}, 0 4px 16px rgba(0,0,0,0.4)`;
               }}
             >
-              Get Tickets →
+              Get Tickets
             </a>
           </div>
         </>
@@ -155,7 +180,7 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
                 (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 16px rgba(16,185,129,0.45), 0 4px 16px rgba(0,0,0,0.4)";
               }}
             >
-              🌿 Get directions →
+              Get directions
             </button>
           </div>
         </>
