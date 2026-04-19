@@ -1,0 +1,37 @@
+name: Refresh Events Data
+
+on:
+  schedule:
+    # Every 2 days at 6 AM UTC (11:30 AM IST) — keeps events fresh for weekends
+    - cron: '0 6 */2 * *'
+  workflow_dispatch: # allow manual trigger from GitHub Actions tab
+
+permissions:
+  contents: write # needed to commit updated events.geojson
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: rm -f package-lock.json && npm install
+
+      - name: Fetch events via Exa
+        env:
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+        run: node scripts/refresh-events.mjs
+
+      - name: Commit updated events if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/events.geojson
+          git diff --staged --quiet || git commit -m "chore: refresh Bengaluru events data [skip ci]"
+          git push

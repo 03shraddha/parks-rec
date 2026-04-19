@@ -1,12 +1,16 @@
 /**
  * GET /api/events
  *
- * Fetches live outdoor events in Bengaluru via SerpApi (Google Events),
- * geocodes each venue address via MapTiler, and returns a GeoJSON
- * FeatureCollection.  Results are cached in-memory for 24 hours.
+ * Fetches live free events in Bengaluru via Exa AI search (Luma, Meetup,
+ * Insider.in, etc.), merges them with the curated static events.geojson,
+ * filters out past events, and returns a GeoJSON FeatureCollection.
+ * Results are cached in-memory for 48 hours.
+ *
+ * Falls back to the static file only when no EXA_API_KEY is set.
  */
 
 import { NextResponse } from "next/server";
+import Exa from "exa-js";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,173 +37,274 @@ interface FeatureCollection {
   features: GeoJSONFeature[];
 }
 
-// Raw shape coming back from SerpApi events_results
-interface SerpEvent {
-  title?: string;
-  date?: { start_date?: string; when?: string };
-  address?: string[];
-  link?: string;
-  thumbnail?: string;
-  venue?: { name?: string };
-  // SerpApi doesn't always return a category field, but it can
-  type?: string;
-}
-
 // ── In-memory cache keyed by location string ─────────────────────────────────
 const cacheMap = new Map<string, { data: FeatureCollection; expires: number }>();
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
 
-// ── Geocoding helper ─────────────────────────────────────────────────────────
+// ── Geocoding helper (Nominatim) ─────────────────────────────────────────────
 
-/**
- * Converts an address string to [lng, lat] using the Mappls Geocoding API.
- * Returns null if the address can't be resolved so the event can be skipped.
- */
 async function geocodeAddress(address: string): Promise<[number, number] | null> {
-  const key = process.env.NEXT_PUBLIC_MAPPLS_KEY;
-  if (!key) return null;
-
-  const encoded = encodeURIComponent(address + " Bengaluru");
-  const url = `https://apis.mappls.com/advancedmaps/v1/${key}/geo_code?address=${encoded}&region=IND`;
+  const query = encodeURIComponent(`${address} Bengaluru`);
+  const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
 
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: { "User-Agent": "walk-the-city-bangalore/1.0" },
+    });
     if (!res.ok) return null;
-
     const json = await res.json();
-    const result = (json.results ?? [])[0];
-    if (!result?.longitude || !result?.latitude) return null;
-
-    return [parseFloat(result.longitude), parseFloat(result.latitude)];
+    if (!json[0]?.lon || !json[0]?.lat) return null;
+    return [parseFloat(json[0].lon), parseFloat(json[0].lat)];
   } catch {
     return null;
+  }
+}
+
+// ── Date parsing helpers ──────────────────────────────────────────────────────
+
+const MONTH_NAMES = [
+  "january","february","march","april","may","june",
+  "july","august","september","october","november","december",
+];
+const MONTH_SHORT = [
+  "jan","feb","mar","apr","may","jun",
+  "jul","aug","sep","oct","nov","dec",
+];
+
+function parseEventDate(dateStr: string): Date | null {
+  if (!dateStr) return null;
+
+  // "Apr 20, 2026" or "April 20, 2026"
+  let m = dateStr.match(/(\w+)\s+(\d{1,2}),?\s+(\d{4})/);
+  if (m) {
+    const idx = [...MONTH_NAMES, ...MONTH_SHORT].findIndex(
+      (mn) => mn === m![1].toLowerCase()
+    );
+    const monthIdx = idx >= 12 ? idx - 12 : idx;
+    if (monthIdx >= 0) return new Date(parseInt(m[3]), monthIdx, parseInt(m[2]));
+  }
+
+  // "20 April 2026" or "20 Apr 2026"
+  m = dateStr.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
+  if (m) {
+    const idx = [...MONTH_NAMES, ...MONTH_SHORT].findIndex(
+      (mn) => mn === m![2].toLowerCase()
+    );
+    const monthIdx = idx >= 12 ? idx - 12 : idx;
+    if (monthIdx >= 0) return new Date(parseInt(m[3]), monthIdx, parseInt(m[1]));
+  }
+
+  // "Sunday, April 20" or "Apr 20" (no year → assume current year)
+  m = dateStr.match(/(\w+)\s+(\d{1,2})(?:,?\s*(\d{4}))?/);
+  if (m) {
+    const idx = [...MONTH_NAMES, ...MONTH_SHORT].findIndex(
+      (mn) => mn === m![1].toLowerCase()
+    );
+    const monthIdx = idx >= 12 ? idx - 12 : idx;
+    const year = m[3] ? parseInt(m[3]) : new Date().getFullYear();
+    if (monthIdx >= 0) return new Date(year, monthIdx, parseInt(m[2]));
+  }
+
+  return null;
+}
+
+// ── Exa result → EventProperties ─────────────────────────────────────────────
+
+function cleanTitle(raw: string): string {
+  return raw
+    .replace(/\s*[|\-–—]\s*(Luma|Insider|Meetup|Eventbrite|BookMyShow|LinkedIn).*$/i, "")
+    .trim();
+}
+
+function extractDateAndTime(text: string): { date: string; time: string } {
+  // Time: "5:00 PM IST", "10:30 AM", "17:00"
+  const timeMatch = text.match(/\b(\d{1,2}:\d{2}\s*(?:AM|PM)?(?:\s*IST)?|\d{2}:\d{2})\b/i);
+  const time = timeMatch ? timeMatch[0].trim() : "";
+
+  // Date patterns
+  const datePatterns = [
+    /\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*,?\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4}/i,
+    /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4}/i,
+    /\b\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}/i,
+    /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}/i,
+  ];
+  for (const pat of datePatterns) {
+    const m = text.match(pat);
+    if (m) return { date: m[0].trim(), time };
+  }
+  return { date: "", time };
+}
+
+function extractVenue(text: string, url: string): string {
+  if (url.includes("lu.ma")) {
+    // Luma pages: venue name often appears after the date line
+    const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+    for (let i = 0; i < lines.length; i++) {
+      const { date } = extractDateAndTime(lines[i]);
+      if (date && i + 1 < lines.length) {
+        const candidate = lines[i + 1];
+        if (candidate.length < 80 && !/^https?:/i.test(candidate)) return candidate;
+      }
+    }
+  }
+  // Generic: first line that looks like a venue (short, no URL)
+  const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  for (const line of lines) {
+    if (line.length > 3 && line.length < 60 && !/^https?:/i.test(line) && /[A-Z]/.test(line[0])) {
+      return line;
+    }
+  }
+  return "";
+}
+
+// ── Load static curated events ────────────────────────────────────────────────
+
+async function loadStaticEvents(): Promise<GeoJSONFeature[]> {
+  try {
+    const { readFile } = await import("fs/promises");
+    const { join } = await import("path");
+    const filePath = join(process.cwd(), "public", "data", "events.geojson");
+    const content = await readFile(filePath, "utf-8");
+    const geojson = JSON.parse(content) as FeatureCollection;
+    return geojson.features ?? [];
+  } catch {
+    return [];
   }
 }
 
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 export async function GET(request: Request): Promise<NextResponse> {
-  const serpApiKey = process.env.SERPAPI_KEY;
+  const exaApiKey = process.env.EXA_API_KEY;
 
-  // Parse optional location query param (e.g. "Indiranagar" or "12.9716,77.5946")
   const { searchParams } = new URL(request.url);
   const locationParam = searchParams.get("location")?.trim() || "Bengaluru";
 
-  // No SerpApi key - serve the curated static events as a fallback
-  if (!serpApiKey) {
-    try {
-      const { readFile } = await import("fs/promises");
-      const { join } = await import("path");
-      const filePath = join(process.cwd(), "public", "data", "events.geojson");
-      const content = await readFile(filePath, "utf-8");
-      return NextResponse.json(JSON.parse(content));
-    } catch {
-      return NextResponse.json({ type: "FeatureCollection", features: [] });
-    }
+  // No Exa key — return static curated events only
+  if (!exaApiKey) {
+    const features = await loadStaticEvents();
+    return NextResponse.json({ type: "FeatureCollection", features });
   }
 
-  // Return cached response if still fresh (keyed by location)
+  // Return cached response if still fresh
   const cached = cacheMap.get(locationParam);
   if (cached && Date.now() < cached.expires) {
     return NextResponse.json(cached.data);
   }
 
-  // ── Step 1: Fetch events from SerpApi ─────────────────────────────────────
-  const defaultQuery = locationParam === "Bengaluru"
-    ? "music tech food outdoor cultural events Bengaluru"
-    : `events ${locationParam}`;
-  const query = encodeURIComponent(defaultQuery);
-  const serpUrl =
-    `https://serpapi.com/search.json` +
-    `?engine=google_events` +
-    `&q=${query}` +
-    `&location=Bengaluru,Karnataka,India` +
-    `&gl=in` +
-    `&hl=en` +
-    `&api_key=${serpApiKey}`;
+  // ── Step 1: Load static curated events ───────────────────────────────────
+  const staticFeatures = await loadStaticEvents();
 
-  let events: SerpEvent[] = [];
+  // ── Step 2: Fetch live events from Exa ───────────────────────────────────
+  const exa = new Exa(exaApiKey);
+  const locationQuery =
+    locationParam === "Bengaluru"
+      ? "free events Bangalore Bengaluru"
+      : `free events ${locationParam} Bangalore`;
+
+  let exaResults: Array<{
+    title: string | null;
+    url: string;
+    publishedDate?: string;
+    text?: string;
+  }> = [];
+
   try {
-    const res = await fetch(serpUrl);
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: `SerpApi returned ${res.status}` },
-        { status: 502 }
-      );
-    }
-    const json = await res.json();
-    // events_results may be absent when there are no results - default to []
-    events = json?.events_results ?? [];
+    const [lumaRes, portalRes] = await Promise.all([
+      // Luma + Meetup: best source for free community events
+      exa.searchAndContents(locationQuery, {
+        type: "auto",
+        numResults: 15,
+        includeDomains: ["lu.ma", "meetup.com"],
+        contents: { text: { maxCharacters: 700 } },
+        livecrawl: "fallback",
+      }),
+      // Indie event portals
+      exa.searchAndContents(`free outdoor cultural events Bengaluru`, {
+        type: "auto",
+        numResults: 10,
+        includeDomains: ["insider.in", "bookmyshow.com", "eventbrite.com"],
+        contents: { text: { maxCharacters: 700 } },
+        livecrawl: "fallback",
+      }),
+    ]);
+
+    exaResults = [
+      ...(lumaRes.results ?? []),
+      ...(portalRes.results ?? []),
+    ];
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to fetch events";
-    console.error("SerpApi fetch error:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error("Exa fetch error:", err instanceof Error ? err.message : err);
+    // On Exa failure, still serve static events
+    return NextResponse.json({ type: "FeatureCollection", features: staticFeatures });
   }
 
-  // No events? Return empty FeatureCollection (not an error)
-  if (!events.length) {
-    const empty: FeatureCollection = { type: "FeatureCollection", features: [] };
-    cacheMap.set(locationParam, { data: empty, expires: Date.now() + CACHE_TTL_MS });
-    return NextResponse.json(empty);
-  }
+  // ── Step 3: Parse Exa results → GeoJSON features ─────────────────────────
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  // ── Step 2: Geocode each event in parallel ────────────────────────────────
-  const features: GeoJSONFeature[] = [];
+  const exaFeatures: GeoJSONFeature[] = [];
+  const seenTitles = new Set(staticFeatures.map((f) => f.properties.title.toLowerCase()));
 
   await Promise.all(
-    events.map(async (event) => {
-      // Build a single address string from the address array
-      const addressParts = event.address ?? [];
-      const address = addressParts.join(", ").trim();
+    exaResults.map(async (result) => {
+      const text = result.text ?? "";
+      const title = cleanTitle(result.title ?? "");
+      if (!title || seenTitles.has(title.toLowerCase())) return;
 
-      // We need an address to geocode; skip events without one
-      if (!address) return;
+      const { date, time } = extractDateAndTime(text);
 
-      const coords = await geocodeAddress(address);
-      if (!coords) return; // geocoding failed - skip silently
+      // Skip past events (if we could parse the date)
+      if (date) {
+        const eventDate = parseEventDate(date);
+        if (eventDate && eventDate < today) return;
+      }
 
-      // Parse date and time out of SerpApi's date fields.
-      // `start_date` is e.g. "Saturday, April 5"
-      // `when`       is e.g. "Saturday, April 5 · 8:45 AM"
-      const startDate = event.date?.start_date ?? "";
-      const when = event.date?.when ?? startDate;
+      const venue = extractVenue(text, result.url);
+      const coords = venue ? await geocodeAddress(venue) : null;
+      if (!coords) return; // can't place it on the map without coordinates
 
-      // Extract time portion: anything after " · " in the `when` string
-      const timePart = when.includes("·")
-        ? when.split("·").slice(1).join("·").trim()
-        : "";
+      // Derive category from URL domain
+      let category = "Community";
+      if (result.url.includes("lu.ma")) category = "Meetup";
+      else if (result.url.includes("meetup.com")) category = "Community";
+      else if (result.url.includes("insider.in")) category = "Cultural";
 
-      // Use start_date for the date field; fall back to the full `when` string
-      const datePart = startDate || when;
-
-      // Derive a category from SerpApi's `type` field, defaulting gracefully
-      const category = event.type ?? "Outdoor";
-
-      features.push({
+      seenTitles.add(title.toLowerCase());
+      exaFeatures.push({
         type: "Feature",
         geometry: { type: "Point", coordinates: coords },
         properties: {
-          title: event.title ?? "Untitled Event",
-          date: datePart,
-          time: timePart,
-          venue: event.venue?.name ?? "",
-          address,
-          ticket_url: event.link ?? null,
-          more_info_url: event.link ?? null,
-          thumbnail: event.thumbnail ?? null,
+          title,
+          date,
+          time,
+          venue,
+          address: `${venue}, Bengaluru`,
+          ticket_url: result.url ?? null,
+          more_info_url: result.url ?? null,
+          thumbnail: null,
           category,
         },
       });
     })
   );
 
-  // ── Step 3: Cache and return ──────────────────────────────────────────────
+  // ── Step 4: Filter past events from static list too ───────────────────────
+  const filteredStatic = staticFeatures.filter((f) => {
+    const d = parseEventDate(f.properties.date);
+    return !d || d >= today;
+  });
+
+  // ── Step 5: Cache and return merged result ────────────────────────────────
   const featureCollection: FeatureCollection = {
     type: "FeatureCollection",
-    features,
+    features: [...filteredStatic, ...exaFeatures],
   };
 
-  cacheMap.set(locationParam, { data: featureCollection, expires: Date.now() + CACHE_TTL_MS });
+  cacheMap.set(locationParam, {
+    data: featureCollection,
+    expires: Date.now() + CACHE_TTL_MS,
+  });
 
   return NextResponse.json(featureCollection);
 }
