@@ -36,6 +36,7 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: "/parks-rec"
           NEXT_PUBLIC_MAPTILER_KEY: ${{ secrets.NEXT_PUBLIC_MAPTILER_KEY }}
           NEXT_PUBLIC_GRAPHHOPPER_API_KEY: ${{ secrets.NEXT_PUBLIC_GRAPHHOPPER_API_KEY }}
+          NEXT_PUBLIC_MAPPLS_KEY: ${{ secrets.NEXT_PUBLIC_MAPPLS_KEY }}
         # Remove API routes before building — they're not compatible with static export.
         # On Vercel (server mode), they still work; only the GitHub Pages build skips them.
         run: rm -rf app/api && npm run build
