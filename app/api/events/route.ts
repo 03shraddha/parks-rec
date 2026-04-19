@@ -60,14 +60,14 @@ async function geocodeAddress(address: string): Promise<[number, number] | null>
   if (!key) return null;
 
   const encoded = encodeURIComponent(address + " Bengaluru");
-  const url = `https://atlas.mapmyindia.com/api/places/geocode?address=${encoded}&access_token=${key}`;
+  const url = `https://apis.mappls.com/advancedmaps/v1/${key}/geo_code?address=${encoded}&region=IND`;
 
   try {
     const res = await fetch(url);
     if (!res.ok) return null;
 
     const json = await res.json();
-    const result = (json.copResults ?? [])[0];
+    const result = (json.results ?? [])[0];
     if (!result?.longitude || !result?.latitude) return null;
 
     return [parseFloat(result.longitude), parseFloat(result.latitude)];

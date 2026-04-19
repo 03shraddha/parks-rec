@@ -474,12 +474,12 @@ async function geocodeQuery(value: string): Promise<GeoFeature[]> {
   if (mappslKey) {
     const encoded = encodeURIComponent(value.trim() + " Bengaluru");
     const res = await fetch(
-      `https://atlas.mapmyindia.com/api/places/geocode?address=${encoded}&access_token=${mappslKey}`
+      `https://apis.mappls.com/advancedmaps/v1/${mappslKey}/geo_code?address=${encoded}&region=IND`
     );
     const data = await res.json();
-    return (data.copResults ?? []).slice(0, 5).map(
-      (r: { formatted_address: string; latitude: string; longitude: string }) => ({
-        place_name: r.formatted_address,
+    return (data.results ?? []).slice(0, 5).map(
+      (r: { formattedAddress: string; latitude: string; longitude: string }) => ({
+        place_name: r.formattedAddress,
         center: [parseFloat(r.longitude), parseFloat(r.latitude)] as [number, number],
       })
     );
