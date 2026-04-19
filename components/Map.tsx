@@ -437,36 +437,44 @@ export default function Map({
   // ── Events data fetch ─────────────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map) return;
 
-    const source = map.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
-    if (!source) return;
+    const apply = () => {
+      const source = map.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
+      if (!source) return;
 
-    if (visibleLayers.events) {
-      setEventsError(false);
-      // On GitHub Pages (static export) the API route is removed; fall back to static GeoJSON.
-      const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-      const locationParam = eventsLocation ? `?location=${encodeURIComponent(eventsLocation)}` : "";
-      const eventsUrl = basePath ? `${basePath}/data/events.geojson` : `/api/events${locationParam}`;
-      fetch(eventsUrl)
-        .then((res) => {
-          if (!res.ok) throw new Error(`Events API returned ${res.status}`);
-          return res.json();
-        })
-        .then((geojson) => {
-          // Re-acquire source after async - style may have swapped
-          const s = mapRef.current?.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
-          s?.setData(geojson);
-          // Notify parent with the loaded event features for the side panel
-          if (onEventsLoaded) onEventsLoaded(geojson.features ?? []);
-        })
-        .catch((err) => {
-          console.warn("Failed to load events:", err);
-          setEventsError(true);
-        });
-    } else {
-      source.setData({ type: "FeatureCollection", features: [] });
+      if (visibleLayers.events) {
+        setEventsError(false);
+        // On GitHub Pages (static export) the API route is removed; fall back to static GeoJSON.
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+        const locationParam = eventsLocation ? `?location=${encodeURIComponent(eventsLocation)}` : "";
+        const eventsUrl = basePath ? `${basePath}/data/events.geojson` : `/api/events${locationParam}`;
+        fetch(eventsUrl)
+          .then((res) => {
+            if (!res.ok) throw new Error(`Events API returned ${res.status}`);
+            return res.json();
+          })
+          .then((geojson) => {
+            // Re-acquire source after async - style may have swapped
+            const s = mapRef.current?.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
+            s?.setData(geojson);
+            // Notify parent with the loaded event features for the side panel
+            if (onEventsLoaded) onEventsLoaded(geojson.features ?? []);
+          })
+          .catch((err) => {
+            console.warn("Failed to load events:", err);
+            setEventsError(true);
+          });
+      } else {
+        source.setData({ type: "FeatureCollection", features: [] });
+      }
+    };
+
+    if (!map.isStyleLoaded()) {
+      map.once("style.load", apply);
+      return () => { map.off("style.load", apply); };
     }
+    apply();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleLayers.events, eventsLocation]);
 
