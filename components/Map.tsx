@@ -464,15 +464,21 @@ export default function Map({
           .catch((err) => {
             console.warn("Failed to load events:", err);
             setEventsError(true);
+            // Clear the parent's loading state so the panel doesn't stay stuck on skeleton
+            if (onEventsLoaded) onEventsLoaded([]);
           });
       } else {
         source.setData({ type: "FeatureCollection", features: [] });
       }
     };
 
-    if (!map.isStyleLoaded()) {
-      map.once("style.load", apply);
-      return () => { map.off("style.load", apply); };
+    // mapReadyRef.current is set inside the map's "load" handler, AFTER addDataSources()
+    // runs. isStyleLoaded() becomes true earlier (on "style.load"), before sources exist —
+    // so using it here would cause getSource("events") to return undefined and the guard
+    // to silently bail, leaving eventsLoading stuck at true forever.
+    if (!mapReadyRef.current) {
+      map.once("load", apply);
+      return () => { map.off("load", apply); };
     }
     apply();
   // eslint-disable-next-line react-hooks/exhaustive-deps
