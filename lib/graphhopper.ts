@@ -132,16 +132,10 @@ export async function fetchRoutes(
   destination: Coordinate,
   maxPaths = 3
 ): Promise<GHRoute[]> {
-  const key =
-    process.env.NEXT_PUBLIC_MAPPLS_KEY ??
-    (typeof window === "undefined" ? undefined : undefined);
-  if (!key) throw new Error("NEXT_PUBLIC_MAPPLS_KEY env var not set.");
-
-  // Mappls route_adv: lng,lat pairs separated by semicolons
+  // OSRM public demo server — same response format, no API key required
   const coords = `${origin.lng},${origin.lat};${destination.lng},${destination.lat}`;
-  const url = new URL(
-    `https://apis.mappls.com/advancedmaps/v1/${key}/route_adv/foot/${coords}`
-  );
+  const url = new URL(`https://router.project-osrm.org/route/v1/foot/${coords}`);
+  url.searchParams.set("overview", "full");
   url.searchParams.set("geometries", "geojson");
   url.searchParams.set("steps", "true");
   if (maxPaths > 1) url.searchParams.set("alternatives", "true");
@@ -149,7 +143,7 @@ export async function fetchRoutes(
   const resp = await fetch(url.toString());
   if (!resp.ok) {
     const body = await resp.text();
-    throw new Error(`Mappls routing error ${resp.status}: ${body}`);
+    throw new Error(`Routing error ${resp.status}: ${body}`);
   }
 
   const data: MapplsResponse = await resp.json();
