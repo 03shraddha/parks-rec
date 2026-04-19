@@ -470,26 +470,7 @@ const LAYER_PILLS: {
 
 // ── Shared geocode search helper ───────────────────────────────────────────
 async function geocodeQuery(value: string): Promise<GeoFeature[]> {
-  const mappslKey = process.env.NEXT_PUBLIC_MAPPLS_KEY ?? "";
-  if (mappslKey) {
-    try {
-      const encoded = encodeURIComponent(value.trim() + " Bengaluru");
-      const res = await fetch(
-        `https://apis.mappls.com/advancedmaps/v1/${mappslKey}/geo_code?address=${encoded}&region=IND`
-      );
-      if (res.ok) {
-        const data = await res.json();
-        const results = (data.results ?? []).slice(0, 5).map(
-          (r: { formattedAddress: string; latitude: string; longitude: string }) => ({
-            place_name: r.formattedAddress,
-            center: [parseFloat(r.longitude), parseFloat(r.latitude)] as [number, number],
-          })
-        );
-        if (results.length > 0) return results;
-      }
-    } catch { /* fall through to Nominatim */ }
-  }
-  // Nominatim fallback - free, full Indian POI coverage
+  // Nominatim - free, no key required, full Indian POI coverage
   const q = encodeURIComponent(value.trim());
   const res = await fetch(
     `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=5&countrycodes=in&bounded=1&viewbox=77.30,13.15,77.85,12.70&addressdetails=1`,
