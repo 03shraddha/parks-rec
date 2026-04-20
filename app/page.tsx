@@ -623,7 +623,7 @@ function BottomSheet({
                   }
                 >
                   <span className="text-base leading-none">{icon}</span>
-                  <span className="font-grotesk leading-tight" style={{ fontSize: "10px" }}>{label}</span>
+                  <span className="font-grotesk leading-tight text-[13px]">{label}</span>
                 </button>
               );
             })}

@@ -181,10 +181,13 @@ html, body, #__next {
 .events-panel-sheet {
   border-radius: 24px 24px 0 0;
   overscroll-behavior: contain;
+  max-height: 70vh;
 }
 @media (min-width: 768px) {
   .events-panel-sheet {
     border-radius: 16px;
+    /* top-20 (80px) + bottom sheet (~220px) + buffer = 360px */
+    max-height: calc(100vh - 360px);
   }
 }
 

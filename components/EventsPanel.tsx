@@ -85,7 +85,6 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
         backdropFilter: "blur(20px) saturate(180%)",
         border: "1px solid rgba(244, 114, 182, 0.18)",
         boxShadow: "0 0 16px rgba(244,114,182,0.25), 0 12px 40px rgba(0,0,0,0.6)",
-        maxHeight: "70vh",
         overscrollBehavior: "contain",
         animation: "slide-up 0.28s cubic-bezier(0.16,1,0.3,1)",
       }}
@@ -107,7 +106,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
           <p className="font-grotesk font-bold text-sm" style={{ color: "var(--text-display)" }}>
             Events Near You
           </p>
-          <p className="font-mono-ui uppercase tracking-[0.10em]" style={{ fontSize: "8px", color: "var(--text-disabled)", marginTop: "1px" }}>
+          <p className="font-mono-ui uppercase tracking-[0.10em]" style={{ fontSize: "10px", color: "var(--text-disabled)", marginTop: "1px" }}>
             {isLoading ? "Loading..." : `${events.length} events`} · Bengaluru
           </p>
           <p className="font-grotesk" style={{ fontSize: "11px", color: "rgba(244,114,182,0.6)", marginTop: "2px" }}>
@@ -206,20 +205,20 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span
                     className="font-mono-ui uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full"
-                    style={{ fontSize: "8px", background: `${catColor}22`, border: `1px solid ${catColor}44`, color: catColor }}
+                    style={{ fontSize: "10px", background: `${catColor}22`, border: `1px solid ${catColor}44`, color: catColor }}
                   >
                     {info.category}
                   </span>
                   <span
                     className="font-mono-ui uppercase tracking-[0.10em] px-1.5 py-0.5 rounded-full"
-                    style={{ fontSize: "8px", background: `${timingColor}18`, border: `1px solid ${timingColor}33`, color: timingColor }}
+                    style={{ fontSize: "10px", background: `${timingColor}18`, border: `1px solid ${timingColor}33`, color: timingColor }}
                   >
                     {timing}
                   </span>
                   {nearRoute && (
                     <span
                       className="font-mono-ui uppercase tracking-[0.10em] px-1.5 py-0.5 rounded-full"
-                      style={{ fontSize: "8px", background: "rgba(74,222,128,0.18)", border: "1px solid rgba(74,222,128,0.35)", color: "#4ADE80", animation: "pulse 2s ease-in-out infinite" }}
+                      style={{ fontSize: "10px", background: "rgba(74,222,128,0.18)", border: "1px solid rgba(74,222,128,0.35)", color: "#4ADE80", animation: "pulse 2s ease-in-out infinite" }}
                     >
                       Along route
                     </span>
@@ -239,7 +238,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
                 {/* Date */}
                 <p
                   className="font-mono-ui uppercase tracking-[0.08em]"
-                  style={{ fontSize: "8px", color: "var(--text-disabled)" }}
+                  style={{ fontSize: "10px", color: "var(--text-disabled)" }}
                 >
                   {info.date}
                 </p>
@@ -251,7 +250,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
 
       {/* Footer hint */}
       <div className="px-4 shrink-0" style={{ borderTop: "1px solid rgba(148,163,184,0.08)", paddingTop: "8px", paddingBottom: "max(8px, env(safe-area-inset-bottom, 8px))" }}>
-        <p className="font-mono-ui uppercase tracking-[0.08em] text-center" style={{ fontSize: "8px", color: "var(--text-disabled)" }}>
+        <p className="font-mono-ui uppercase tracking-[0.08em] text-center" style={{ fontSize: "10px", color: "var(--text-disabled)" }}>
           Updated every 48h · Tap to explore
         </p>
       </div>

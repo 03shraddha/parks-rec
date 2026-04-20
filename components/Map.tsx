@@ -5,7 +5,7 @@
  *
  * Responsibilities:
  *  - Render the base MapTiler style
- *  - Add all geo data sources (lakes, parks, trees, bus stops, heat tiles)
+ *  - Add all geo data sources (lakes, parks, trees, bus stops)
  *  - Render route lines when fastRoute / coolRoute are provided
  *  - Handle pin dropping (origin + destination)
  *  - Fire onSegmentClick when a route segment is tapped
@@ -80,6 +80,7 @@ export interface LayerVisibility {
   busStops: boolean;
   trails: boolean;
   events: boolean;
+  water: boolean;
 }
 
 interface MapProps {
@@ -527,6 +528,7 @@ function addDataSources(map: maplibregl.Map) {
     [SOURCE_IDS.trees, "tree-density.geojson"],
     [SOURCE_IDS.busStops, "bus-stops.geojson"],
     [SOURCE_IDS.trails, "trails.geojson"],
+    [SOURCE_IDS.waterStops, "water-stops.geojson"],
   ] as [string, string][]) {
     map.addSource(id, {
       type: "geojson",
@@ -628,6 +630,20 @@ function addDataLayers(map: maplibregl.Map) {
       "line-opacity": 0.90,
     },
     layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+  });
+
+  // Water stops - sky-blue circle pins, drawn above data layers
+  map.addLayer({
+    id: LAYER_IDS.waterStops,
+    type: "circle",
+    source: SOURCE_IDS.waterStops,
+    paint: {
+      "circle-color": "#38BDF8",
+      "circle-radius": 5,
+      "circle-stroke-color": "#fff",
+      "circle-stroke-width": 1.5,
+    },
+    layout: { visibility: "none" },
   });
 
   // Events - pink circle pins, drawn above data layers but below route lines
