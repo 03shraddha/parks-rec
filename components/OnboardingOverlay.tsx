@@ -49,8 +49,8 @@ export default function OnboardingOverlay({ onClose }: OnboardingOverlayProps) {
   return (
     // Full-screen backdrop - click outside card to dismiss
     <div
-      className="absolute inset-0 z-50 flex items-end md:items-center justify-center pb-6 md:pb-0"
-      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)" }}
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:pb-0"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)", paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))" }}
       onClick={handleClose}
     >
       {/* Card - stop propagation so clicks inside don't dismiss */}

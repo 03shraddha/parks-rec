@@ -333,7 +333,7 @@ export default function HomePage() {
 
       {/* ── Event popup ───────────────────────────────────────────────────── */}
       {eventInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20 pointer-events-none">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20 pointer-events-none" style={{ maxHeight: "calc(100dvh - 5rem)" }}>
           <EventPopup
             info={eventInfo}
             onClose={() => setEventInfo(null)}
@@ -607,15 +607,15 @@ function BottomSheet({
             boxShadow: "0 -4px 32px rgba(0,0,0,0.18)",
           }}
         >
-          {/* Layer pills - horizontal scroll, no scrollbar */}
-          <div className="flex gap-2 px-3 pt-3 pb-2 overflow-x-auto" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
+          {/* Layer pills - 3-column grid so all 6 are visible without scrolling */}
+          <div className="grid grid-cols-3 gap-1.5 px-3 pt-3 pb-2">
             {LAYER_PILLS.map(({ key, icon, label, color, glow, border }) => {
               const on = visibleLayers[key];
               return (
                 <button
                   key={key}
                   onClick={() => onToggleLayer(key)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0"
+                  className="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-xs font-semibold transition-all duration-200 w-full"
                   style={
                     on
                       ? { background: color, border: `1px solid ${border}`, color: "#fff", boxShadow: `0 0 10px ${glow}` }
@@ -623,7 +623,7 @@ function BottomSheet({
                   }
                 >
                   <span className="text-sm leading-none">{icon}</span>
-                  <span className="font-grotesk">{label}</span>
+                  <span className="font-grotesk truncate">{label}</span>
                 </button>
               );
             })}
@@ -686,9 +686,9 @@ function BottomSheet({
         </div>
 
         {/* From / To inputs */}
-        <div className="px-3 pt-1 pb-1 flex flex-col">
+        <div className="px-3 pt-1 pb-1 flex flex-col min-w-0 overflow-hidden">
           {/* ── A: From ── */}
-          <div className="flex items-center gap-2.5 py-2.5" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+          <div className="flex items-center gap-2 py-2.5 min-w-0" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
             <div
               className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
               style={{ background: "linear-gradient(135deg,var(--jade),#059669)", boxShadow: "0 0 8px var(--jade-glow)" }}
@@ -736,7 +736,7 @@ function BottomSheet({
           </div>
 
           {/* ── B: To ── */}
-          <div className="flex items-center gap-2.5 py-2.5">
+          <div className="flex items-center gap-2 py-2.5 min-w-0">
             <div
               className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
               style={{ background: "linear-gradient(135deg,var(--amber),#D97706)", boxShadow: "0 0 8px var(--amber-glow)" }}

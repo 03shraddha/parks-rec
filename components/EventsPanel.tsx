@@ -110,6 +110,9 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
           <p className="font-mono-ui uppercase tracking-[0.10em]" style={{ fontSize: "8px", color: "var(--text-disabled)", marginTop: "1px" }}>
             {isLoading ? "Loading..." : `${events.length} events`} · Bengaluru
           </p>
+          <p className="font-grotesk" style={{ fontSize: "11px", color: "rgba(244,114,182,0.6)", marginTop: "2px" }}>
+            Live + curated · Search any neighbourhood
+          </p>
         </div>
         <button
           onClick={onClose}
@@ -249,7 +252,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
       {/* Footer hint */}
       <div className="px-4 shrink-0" style={{ borderTop: "1px solid rgba(148,163,184,0.08)", paddingTop: "8px", paddingBottom: "max(8px, env(safe-area-inset-bottom, 8px))" }}>
         <p className="font-mono-ui uppercase tracking-[0.08em] text-center" style={{ fontSize: "8px", color: "var(--text-disabled)" }}>
-          Tap an event to zoom in on the map
+          Updated every 48h · Tap to explore
         </p>
       </div>
     </div>

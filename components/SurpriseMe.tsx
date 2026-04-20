@@ -223,10 +223,12 @@ export default function SurpriseMe({ onFlyTo }: SurpriseMeProps) {
       {/* ── Toast ── */}
       {toast && (
         <div
-          className="pointer-events-none fixed left-1/2 bottom-28 z-50"
+          className="pointer-events-none fixed left-1/2 z-50"
           style={{
+            bottom: "clamp(8rem, 30dvh, 14rem)",
             transform: "translateX(-50%)",
             animation: "surprise-toast 0.3s cubic-bezier(0.16,1,0.3,1)",
+            maxWidth: "calc(100vw - 2rem)",
           }}
         >
           <div
@@ -234,7 +236,7 @@ export default function SurpriseMe({ onFlyTo }: SurpriseMeProps) {
             style={{
               border: "1px solid rgba(167, 139, 250, 0.45)",
               boxShadow: "0 0 20px rgba(124,58,237,0.40), 0 8px 32px rgba(0,0,0,0.25)",
-              minWidth: "220px",
+              minWidth: "min(220px, calc(100vw - 2rem))",
             }}
           >
             {/* Park name */}
