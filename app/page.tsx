@@ -460,12 +460,12 @@ const LAYER_PILLS: {
   glow: string;
   border: string;
 }[] = [
-  { key: "trees",    icon: "🌳", label: "Trees",    color: "linear-gradient(135deg,#10B981,#059669)", glow: "rgba(16,185,129,.5)",  border: "rgba(52,211,153,.6)" },
-  { key: "parks",    icon: "🏞", label: "Parks",    color: "linear-gradient(135deg,#34D399,#10B981)", glow: "rgba(52,211,153,.5)",  border: "rgba(52,211,153,.6)" },
-  { key: "lakes",    icon: "💧", label: "Water",    color: "linear-gradient(135deg,#06B6D4,#0284C7)", glow: "rgba(6,182,212,.5)",   border: "rgba(103,232,249,.6)" },
-  { key: "busStops", icon: "🚌", label: "Buses",    color: "linear-gradient(135deg,#A78BFA,#7C3AED)", glow: "rgba(124,58,237,.5)",  border: "rgba(167,139,250,.6)" },
-  { key: "trails",   icon: "🥾", label: "Trails",   color: "linear-gradient(135deg,#86EFAC,#22C55E)", glow: "rgba(134,239,172,.5)", border: "rgba(134,239,172,.6)" },
-  { key: "events",   icon: "🎉", label: "Events",   color: "linear-gradient(135deg,#F472B6,#EC4899)", glow: "rgba(244,114,182,.5)", border: "rgba(249,168,212,.6)" },
+  { key: "trees",    icon: "🌳", label: "Walk in Shade",      color: "linear-gradient(135deg,#10B981,#059669)", glow: "rgba(16,185,129,.5)",  border: "rgba(52,211,153,.6)" },
+  { key: "parks",    icon: "🏞", label: "Parks Near You",      color: "linear-gradient(135deg,#34D399,#10B981)", glow: "rgba(52,211,153,.5)",  border: "rgba(52,211,153,.6)" },
+  { key: "lakes",    icon: "💧", label: "Lakes Near You",      color: "linear-gradient(135deg,#06B6D4,#0284C7)", glow: "rgba(6,182,212,.5)",   border: "rgba(103,232,249,.6)" },
+  { key: "busStops", icon: "🚌", label: "Bus Stops Near You",  color: "linear-gradient(135deg,#A78BFA,#7C3AED)", glow: "rgba(124,58,237,.5)",  border: "rgba(167,139,250,.6)" },
+  { key: "trails",   icon: "🥾", label: "Walking Paths",       color: "linear-gradient(135deg,#86EFAC,#22C55E)", glow: "rgba(134,239,172,.5)", border: "rgba(134,239,172,.6)" },
+  { key: "events",   icon: "🎉", label: "BLR Events",          color: "linear-gradient(135deg,#F472B6,#EC4899)", glow: "rgba(244,114,182,.5)", border: "rgba(249,168,212,.6)" },
 ];
 
 // ── Shared geocode search helper ───────────────────────────────────────────
@@ -615,15 +615,15 @@ function BottomSheet({
                 <button
                   key={key}
                   onClick={() => onToggleLayer(key)}
-                  className="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-xs font-semibold transition-all duration-200 w-full"
+                  className="flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-xl font-semibold transition-all duration-200 w-full text-center"
                   style={
                     on
                       ? { background: color, border: `1px solid ${border}`, color: "#fff", boxShadow: `0 0 10px ${glow}` }
                       : { background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }
                   }
                 >
-                  <span className="text-sm leading-none">{icon}</span>
-                  <span className="font-grotesk truncate">{label}</span>
+                  <span className="text-base leading-none">{icon}</span>
+                  <span className="font-grotesk leading-tight" style={{ fontSize: "10px" }}>{label}</span>
                 </button>
               );
             })}
