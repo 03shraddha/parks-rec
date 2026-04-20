@@ -179,7 +179,7 @@ export default function EventPopup({ info, onClose, onGetDirections }: EventPopu
               href={info.more_info_url}
               target="_blank"
               rel="noopener noreferrer"
-              title="Opens external event page — may require sign-in"
+              title="Opens external event page (may require sign-in)"
               className="block w-full py-2.5 rounded-xl font-grotesk text-sm font-bold text-center transition-all duration-200"
               style={{
                 background: "rgba(139,92,246,0.15)",
