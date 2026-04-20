@@ -55,8 +55,9 @@ export default function OnboardingOverlay({ onClose }: OnboardingOverlayProps) {
     >
       {/* Card - stop propagation so clicks inside don't dismiss */}
       <div
-        className="w-[calc(100%-2rem)] max-w-sm rounded-2xl overflow-hidden pointer-events-auto"
+        className="w-[calc(100%-2rem)] max-w-sm rounded-2xl overflow-y-auto pointer-events-auto"
         style={{
+          maxHeight: "90dvh",
           background: "var(--bg-card)",
           backdropFilter: "blur(24px) saturate(180%)",
           border: `1px solid ${current.border}`,

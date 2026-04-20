@@ -190,7 +190,7 @@ export default function HomePage() {
 
   // ── UI ───────────────────────────────────────────────────────────────────
   return (
-    <main className="relative w-screen h-screen overflow-hidden" style={{ background: "var(--bg-deep)" }}>
+    <main className="relative w-screen overflow-hidden" style={{ background: "var(--bg-deep)", height: "100dvh" }}>
       {/* Full-screen map */}
       <Map
         ref={mapHandleRef}
@@ -211,7 +211,7 @@ export default function HomePage() {
       />
 
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
-      <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-4 pointer-events-none z-10">
+      <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pointer-events-none z-10" style={{ paddingTop: "max(1rem, env(safe-area-inset-top, 1rem))" }}>
         {/* Brand */}
         <div
           className="pointer-events-auto anime-panel glow-violet rounded-2xl px-4 py-2.5 flex items-center gap-3 overflow-hidden"
@@ -326,14 +326,14 @@ export default function HomePage() {
 
       {/* ── Segment popup ─────────────────────────────────────────────────── */}
       {segmentInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20 pointer-events-none">
           <SegmentPopup info={segmentInfo} onClose={() => setSegmentInfo(null)} />
         </div>
       )}
 
       {/* ── Event popup ───────────────────────────────────────────────────── */}
       {eventInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20 pointer-events-none">
           <EventPopup
             info={eventInfo}
             onClose={() => setEventInfo(null)}
@@ -352,7 +352,7 @@ export default function HomePage() {
 
       {/* ── Park popup ────────────────────────────────────────────────────── */}
       {parkInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20 pointer-events-none">
           <ParkPanel
             info={parkInfo}
             onClose={() => setParkInfo(null)}
@@ -368,7 +368,7 @@ export default function HomePage() {
       {/* ── Events panel - mobile bottom sheet, desktop sidebar ── */}
       {visibleLayers.events && !eventInfo && !activeNavRoute && (
         <div
-          className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none md:top-20 md:bottom-auto md:right-4 md:left-auto md:w-72"
+          className="absolute bottom-0 left-0 right-0 z-[25] pointer-events-none md:top-20 md:bottom-auto md:right-4 md:left-auto md:w-72"
         >
           <EventsPanel
             events={eventsList}
@@ -394,7 +394,7 @@ export default function HomePage() {
 
       {/* ── Trail popup ───────────────────────────────────────────────────── */}
       {trailInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-40 md:left-4 md:translate-x-0 z-20">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-40 md:left-4 md:translate-x-0 z-20 pointer-events-none">
           <TrailPopup info={trailInfo} onClose={() => setTrailInfo(null)} />
         </div>
       )}
@@ -667,7 +667,7 @@ function BottomSheet({
           border: "1px solid var(--border-subtle)",
           boxShadow: "0 -4px 32px rgba(0,0,0,0.18)",
           animation: "slide-up 0.25s cubic-bezier(0.16,1,0.3,1)",
-          maxHeight: "85vh",
+          maxHeight: "min(85dvh, calc(100dvh - 80px))",
           overflowY: "auto",
         }}
       >

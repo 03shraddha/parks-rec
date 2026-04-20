@@ -64,6 +64,7 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
   const [distToNext, setDistToNext] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [heading, setHeading] = useState<number | null>(null);
+  const [gpsError, setGpsError] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const routeCoords = route.points.coordinates;
   const instructions: GHInstruction[] = route.instructions ?? [];
@@ -101,7 +102,7 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
         onNavUpdate?.(coord, hdg);
         advanceStep(coord);
       },
-      () => {},
+      () => { setGpsError(true); },
       { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
     );
     return () => {
@@ -138,6 +139,15 @@ export default function NavigationPanel({ route, routeType, onExit, onPositionUp
       <div className="flex justify-center pt-3 pb-1">
         <div className="w-10 h-1 rounded-full" style={{ background: `${accentColor}55` }} />
       </div>
+
+      {/* GPS error banner */}
+      {gpsError && (
+        <div className="mx-4 mb-2 px-3 py-2 rounded-xl flex items-center gap-2" style={{ background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.25)" }}>
+          <span style={{ fontSize: "14px" }}>⚠️</span>
+          <p className="font-grotesk text-xs" style={{ color: "#F87171", flex: 1 }}>GPS signal lost. Move to open sky.</p>
+          <button onClick={() => setGpsError(false)} className="text-xs" style={{ color: "#F87171" }}>✕</button>
+        </div>
+      )}
 
       {/* Current step - large, prominent */}
       <div className="px-5 py-3" onClick={() => setExpanded(!expanded)} style={{ cursor: "pointer" }}>

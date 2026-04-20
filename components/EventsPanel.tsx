@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { EventInfo } from "./Map";
 
 interface EventFeature {
@@ -64,6 +64,7 @@ function isNearRoute(eventCoord: [number, number], routeCoords: [number, number]
 
 export default function EventsPanel({ events, isLoading, onEventSelect, onClose, onLocationSearch, routeCoords }: EventsPanelProps) {
   const [locationQuery, setLocationQuery] = useState("");
+  const touchStartY = useRef<number>(0);
 
   const handleLocationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +75,11 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
   return (
     <div
       className="pointer-events-auto w-full md:w-72 flex flex-col events-panel-sheet"
+      onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY; }}
+      onTouchEnd={(e) => {
+        const delta = e.changedTouches[0].clientY - touchStartY.current;
+        if (delta > 80) onClose();
+      }}
       style={{
         background: "var(--bg-card)",
         backdropFilter: "blur(20px) saturate(180%)",

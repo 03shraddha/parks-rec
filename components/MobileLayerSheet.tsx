@@ -12,10 +12,14 @@ export default function MobileLayerSheet({ children, activeLayerCount }: MobileL
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    let timer: ReturnType<typeof setTimeout>;
+    const check = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => setIsMobile(window.innerWidth < 768), 80);
+    };
     check();
     window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    return () => { window.removeEventListener("resize", check); clearTimeout(timer); };
   }, []);
 
   // Desktop: transparent pass-through

@@ -24,6 +24,7 @@ interface EventProperties {
   more_info_url: string | null;
   thumbnail: string | null;
   category: string;
+  approximate?: boolean;
 }
 
 interface GeoJSONFeature {
@@ -261,8 +262,10 @@ export async function GET(request: Request): Promise<NextResponse> {
       }
 
       const venue = extractVenue(text, result.url);
-      const coords = venue ? await geocodeAddress(venue) : null;
-      if (!coords) return; // can't place it on the map without coordinates
+      const geocoded = venue ? await geocodeAddress(venue) : null;
+      // Fall back to Bengaluru city center if geocoding fails
+      const coords: [number, number] = geocoded ?? [77.5946, 12.9716];
+      const approximate = !geocoded;
 
       // Derive category from URL domain
       let category = "Community";
@@ -284,6 +287,7 @@ export async function GET(request: Request): Promise<NextResponse> {
           more_info_url: result.url ?? null,
           thumbnail: null,
           category,
+          ...(approximate && { approximate: true }),
         },
       });
     })
