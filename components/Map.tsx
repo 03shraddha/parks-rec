@@ -44,6 +44,9 @@ export interface EventInfo {
   category: string;
   lng?: number;  // coordinate for "get directions" feature
   lat?: number;
+  organizer?: string;
+  contact_phone?: string;
+  contact_email?: string;
 }
 
 /** Properties of a clicked trail feature */

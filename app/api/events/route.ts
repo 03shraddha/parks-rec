@@ -25,6 +25,9 @@ interface EventProperties {
   thumbnail: string | null;
   category: string;
   approximate?: boolean;
+  organizer?: string;
+  contact_phone?: string;
+  contact_email?: string;
 }
 
 interface GeoJSONFeature {
@@ -158,6 +161,31 @@ function extractVenue(text: string, url: string): string {
   return "";
 }
 
+function extractContact(text: string): { organizer?: string; phone?: string; email?: string } {
+  // Email
+  const emailMatch = text.match(/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}\b/i);
+
+  // Indian mobile / international phone
+  const phoneMatch = text.match(/(?:\+91[\s-]?)?[6-9]\d{9}|\+91\s?\d{10}/);
+
+  // Organizer name after common patterns
+  const orgPatterns = [
+    /(?:hosted|organized|organised|presented|by)\s+by\s+([\w\s&.'"-]{3,50?}?)(?:[,\n.]|$)/i,
+    /(?:Organis(?:er|ed)|Organiz(?:er|ed)|Host)\s*[:\-]\s*([\w\s&.'"-]{3,50?}?)(?:[,\n.]|$)/i,
+  ];
+  let organizer: string | undefined;
+  for (const pat of orgPatterns) {
+    const m = text.match(pat);
+    if (m?.[1]) { organizer = m[1].trim(); break; }
+  }
+
+  return {
+    ...(organizer && { organizer }),
+    ...(phoneMatch && { phone: phoneMatch[0].trim() }),
+    ...(emailMatch && { email: emailMatch[0].toLowerCase().trim() }),
+  };
+}
+
 // ── Load static curated events ────────────────────────────────────────────────
 
 async function loadStaticEvents(): Promise<GeoJSONFeature[]> {
@@ -273,6 +301,8 @@ export async function GET(request: Request): Promise<NextResponse> {
       else if (result.url.includes("meetup.com")) category = "Community";
       else if (result.url.includes("insider.in")) category = "Cultural";
 
+      const { organizer, phone, email } = extractContact(text);
+
       seenTitles.add(title.toLowerCase());
       exaFeatures.push({
         type: "Feature",
@@ -288,6 +318,9 @@ export async function GET(request: Request): Promise<NextResponse> {
           thumbnail: null,
           category,
           ...(approximate && { approximate: true }),
+          ...(organizer && { organizer }),
+          ...(phone && { contact_phone: phone }),
+          ...(email && { contact_email: email }),
         },
       });
     })

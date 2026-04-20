@@ -214,36 +214,36 @@ export default function HomePage() {
       <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pointer-events-none z-10" style={{ paddingTop: "max(1rem, env(safe-area-inset-top, 1rem))" }}>
         {/* Brand */}
         <div
-          className="pointer-events-auto anime-panel glow-violet rounded-2xl px-4 py-2.5 flex items-center gap-3 overflow-hidden"
+          className="pointer-events-auto anime-panel glow-violet rounded-2xl px-4 py-2.5 flex items-center gap-3"
           style={{ minWidth: 0 }}
         >
-          {/* Animated nature icon */}
+          {/* Nature icon */}
           <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-lg"
+            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
             style={{
               background: "linear-gradient(135deg, var(--jade), var(--cyan))",
               boxShadow: "0 0 12px var(--jade-glow)",
             }}
           >
-            🌿
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+            </svg>
           </div>
-          <div>
-            {/* PRIMARY - the one thing seen first in this panel */}
+          <div className="min-w-0">
             <p
-              className="font-zen font-bold leading-tight text-base"
+              className="font-zen font-bold leading-tight text-base whitespace-nowrap"
               style={{ color: "var(--text-display)", letterSpacing: "-0.01em" }}
             >
               Walk the City
             </p>
-            {/* TERTIARY - Space Mono ALL CAPS, pushed visually to background */}
             <p
-              className="font-mono-ui leading-tight truncate"
+              className="font-mono-ui leading-tight whitespace-nowrap"
               style={{
                 fontSize: "9px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "var(--text-disabled)",
-                maxWidth: "150px",
               }}
             >
               Without melting · Bengaluru
@@ -333,7 +333,7 @@ export default function HomePage() {
 
       {/* ── Event popup ───────────────────────────────────────────────────── */}
       {eventInfo && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-20 md:right-4 z-20 pointer-events-none" style={{ maxHeight: "calc(100dvh - 5rem)" }}>
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-4 z-30 pointer-events-none" style={{ maxHeight: "calc(100dvh - 6rem)" }}>
           <EventPopup
             info={eventInfo}
             onClose={() => setEventInfo(null)}

@@ -133,6 +133,12 @@ html, body, #__next {
   50%       { transform: translateX(-50%) translateY(-3px); }
 }
 
+@keyframes card-unfurl {
+  0%   { opacity: 0; transform: translateY(-10px) scaleY(0.90); filter: blur(3px); }
+  60%  { opacity: 1; transform: translateY(1px) scaleY(1.01); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scaleY(1); filter: blur(0); }
+}
+
 @keyframes surprise-toast {
   from { opacity: 0; transform: translateX(-50%) translateY(12px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0);    }
