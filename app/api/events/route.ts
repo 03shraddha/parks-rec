@@ -52,9 +52,13 @@ async function geocodeAddress(address: string): Promise<[number, number] | null>
   const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
 
   try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3000);
     const res = await fetch(url, {
       headers: { "User-Agent": "walk-the-city-bangalore/1.0" },
+      signal: controller.signal,
     });
+    clearTimeout(timer);
     if (!res.ok) return null;
     const json = await res.json();
     if (!json[0]?.lon || !json[0]?.lat) return null;
@@ -243,18 +247,18 @@ export async function GET(request: Request): Promise<NextResponse> {
       // Luma + Meetup: best source for free community events
       exa.searchAndContents(locationQuery, {
         type: "auto",
-        numResults: 15,
+        numResults: 8,
         includeDomains: ["lu.ma", "meetup.com"],
         contents: { text: { maxCharacters: 700 } },
-        livecrawl: "fallback",
+        livecrawl: "never",
       }),
       // Indie event portals
       exa.searchAndContents(`free outdoor cultural events Bengaluru`, {
         type: "auto",
-        numResults: 10,
+        numResults: 6,
         includeDomains: ["insider.in", "bookmyshow.com", "eventbrite.com"],
         contents: { text: { maxCharacters: 700 } },
-        livecrawl: "fallback",
+        livecrawl: "never",
       }),
     ]);
 
@@ -291,8 +295,9 @@ export async function GET(request: Request): Promise<NextResponse> {
 
       const venue = extractVenue(text, result.url);
       const geocoded = venue ? await geocodeAddress(venue) : null;
-      // Fall back to Bengaluru city center if geocoding fails
-      const coords: [number, number] = geocoded ?? [77.5946, 12.9716];
+      // Fall back to Bengaluru city center with small jitter so pins don't stack
+      const jitter = () => (Math.random() - 0.5) * 0.04;
+      const coords: [number, number] = geocoded ?? [77.5946 + jitter(), 12.9716 + jitter()];
       const approximate = !geocoded;
 
       // Derive category from URL domain
