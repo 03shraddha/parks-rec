@@ -369,7 +369,7 @@ export default function HomePage() {
       {/* ── Events panel - mobile bottom sheet, desktop sidebar ── */}
       {visibleLayers.events && !eventInfo && !activeNavRoute && (
         <div
-          className="absolute bottom-0 left-0 right-0 z-[25] pointer-events-none md:top-20 md:bottom-auto md:right-4 md:left-auto md:w-72 md:max-h-[calc(100dvh-6rem)] md:overflow-hidden md:flex md:flex-col"
+          className="absolute bottom-0 left-0 right-0 z-[25] pointer-events-none md:top-20 md:bottom-auto md:right-4 md:left-auto md:w-72 md:max-h-[calc(100dvh-9rem)] md:overflow-hidden md:flex md:flex-col"
         >
           <EventsPanel
             events={eventsList}

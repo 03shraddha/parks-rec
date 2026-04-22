@@ -106,10 +106,10 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
           <p className="font-grotesk font-bold text-sm" style={{ color: "var(--text-display)" }}>
             Events Near You
           </p>
-          <p className="font-mono-ui uppercase tracking-[0.10em]" style={{ fontSize: "10px", color: "var(--text-disabled)", marginTop: "1px" }}>
+          <p className="text-tertiary" style={{ marginTop: "1px" }}>
             {isLoading ? "Loading..." : `${events.length} events`} · Bengaluru
           </p>
-          <p className="font-grotesk" style={{ fontSize: "11px", color: "rgba(244,114,182,0.6)", marginTop: "2px" }}>
+          <p className="font-grotesk text-xs" style={{ color: "rgba(244,114,182,0.6)", marginTop: "2px" }}>
             Live + curated · Search any neighbourhood
           </p>
         </div>
@@ -226,7 +226,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
                 </div>
 
                 {/* Event title */}
-                <p className="font-grotesk font-semibold text-[13px] leading-snug" style={{ color: "var(--text-primary)" }}>
+                <p className="font-grotesk font-semibold text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
                   {info.title}
                 </p>
 
@@ -236,10 +236,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
                 </p>
 
                 {/* Date */}
-                <p
-                  className="font-mono-ui uppercase tracking-[0.08em]"
-                  style={{ fontSize: "10px", color: "var(--text-disabled)" }}
-                >
+                <p className="text-tertiary" style={{ letterSpacing: "0.08em" }}>
                   {info.date}
                 </p>
               </button>
@@ -250,7 +247,7 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
 
       {/* Footer hint */}
       <div className="px-4 shrink-0" style={{ borderTop: "1px solid rgba(148,163,184,0.08)", paddingTop: "8px", paddingBottom: "max(8px, env(safe-area-inset-bottom, 8px))" }}>
-        <p className="font-mono-ui uppercase tracking-[0.08em] text-center" style={{ fontSize: "10px", color: "var(--text-disabled)" }}>
+        <p className="text-tertiary text-center" style={{ letterSpacing: "0.08em" }}>
           Updated every 48h · Tap to explore
         </p>
       </div>

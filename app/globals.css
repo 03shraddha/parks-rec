@@ -186,8 +186,8 @@ html, body, #__next {
 @media (min-width: 768px) {
   .events-panel-sheet {
     border-radius: 16px;
-    /* top-20 (80px) + bottom sheet (~220px) + buffer = 360px */
-    max-height: calc(100vh - 360px);
+    /* top-20 (80px) + map controls (140px) = 220px bottom clearance */
+    max-height: calc(100vh - 220px);
   }
 }
 
