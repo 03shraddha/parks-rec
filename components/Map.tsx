@@ -455,10 +455,11 @@ export default function Map({
         const apiUrl = `/api/events${locationParam}`;
         const staticUrl = `${basePath}/data/events.geojson`;
 
-        const applyGeojson = (geojson: { features?: unknown[] }) => {
+        const applyGeojson = (geojson: { type: string; features?: EventFeature[] }) => {
           const s = mapRef.current?.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
-          s?.setData(geojson as Parameters<typeof s.setData>[0]);
-          if (onEventsLoaded) onEventsLoaded((geojson.features ?? []) as Parameters<typeof onEventsLoaded>[0]);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          s?.setData(geojson as any);
+          if (onEventsLoaded) onEventsLoaded(geojson.features ?? []);
         };
 
         fetch(apiUrl)
