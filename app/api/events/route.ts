@@ -243,6 +243,10 @@ export async function GET(request: Request): Promise<NextResponse> {
   }> = [];
 
   try {
+    const portalQuery = locationParam === "Bengaluru"
+      ? "free outdoor cultural events Bengaluru"
+      : `free events ${locationParam} Bengaluru`;
+
     const [lumaRes, portalRes] = await Promise.all([
       // Luma + Meetup: best source for free community events
       exa.searchAndContents(locationQuery, {
@@ -250,15 +254,15 @@ export async function GET(request: Request): Promise<NextResponse> {
         numResults: 8,
         includeDomains: ["lu.ma", "meetup.com"],
         contents: { text: { maxCharacters: 700 } },
-        livecrawl: "never",
+        livecrawl: "fallback",
       }),
       // Indie event portals
-      exa.searchAndContents(`free outdoor cultural events Bengaluru`, {
+      exa.searchAndContents(portalQuery, {
         type: "auto",
         numResults: 6,
         includeDomains: ["insider.in", "bookmyshow.com", "eventbrite.com"],
         contents: { text: { maxCharacters: 700 } },
-        livecrawl: "never",
+        livecrawl: "fallback",
       }),
     ]);
 
@@ -267,9 +271,13 @@ export async function GET(request: Request): Promise<NextResponse> {
       ...(portalRes.results ?? []),
     ];
   } catch (err) {
-    console.error("Exa fetch error:", err instanceof Error ? err.message : err);
-    // On Exa failure, still serve static events
-    return NextResponse.json({ type: "FeatureCollection", features: staticFeatures });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[events] Exa fetch failed:", msg);
+    // Return static events with a header so the client can detect Exa failure
+    return NextResponse.json(
+      { type: "FeatureCollection", features: staticFeatures },
+      { headers: { "X-Events-Source": "static-fallback", "X-Events-Error": msg.slice(0, 120) } }
+    );
   }
 
   // ── Step 3: Parse Exa results → GeoJSON features ─────────────────────────
