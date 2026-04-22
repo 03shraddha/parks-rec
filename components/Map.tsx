@@ -449,26 +449,34 @@ export default function Map({
 
       if (visibleLayers.events) {
         setEventsError(false);
-        // On GitHub Pages (static export) the API route is removed; fall back to static GeoJSON.
         const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
         const locationParam = eventsLocation ? `?location=${encodeURIComponent(eventsLocation)}` : "";
-        const eventsUrl = basePath ? `${basePath}/data/events.geojson` : `/api/events${locationParam}`;
-        fetch(eventsUrl)
+        // Always try the live API first; fall back to static GeoJSON on static hosts (GitHub Pages)
+        const apiUrl = `/api/events${locationParam}`;
+        const staticUrl = `${basePath}/data/events.geojson`;
+
+        const applyGeojson = (geojson: { features?: unknown[] }) => {
+          const s = mapRef.current?.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
+          s?.setData(geojson as Parameters<typeof s.setData>[0]);
+          if (onEventsLoaded) onEventsLoaded((geojson.features ?? []) as Parameters<typeof onEventsLoaded>[0]);
+        };
+
+        fetch(apiUrl)
           .then((res) => {
-            if (!res.ok) throw new Error(`Events API returned ${res.status}`);
+            if (!res.ok) throw new Error(`API ${res.status}`);
             return res.json();
           })
-          .then((geojson) => {
-            // Re-acquire source after async - style may have swapped
-            const s = mapRef.current?.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
-            s?.setData(geojson);
-            // Notify parent with the loaded event features for the side panel
-            if (onEventsLoaded) onEventsLoaded(geojson.features ?? []);
-          })
+          .catch(() =>
+            // API unavailable (static host) — fall back to bundled GeoJSON
+            fetch(staticUrl).then((res) => {
+              if (!res.ok) throw new Error(`Static ${res.status}`);
+              return res.json();
+            })
+          )
+          .then(applyGeojson)
           .catch((err) => {
             console.warn("Failed to load events:", err);
             setEventsError(true);
-            // Clear the parent's loading state so the panel doesn't stay stuck on skeleton
             if (onEventsLoaded) onEventsLoaded([]);
           });
       } else {
