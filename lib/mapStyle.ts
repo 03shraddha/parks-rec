@@ -86,6 +86,7 @@ export const LAYER_IDS = {
   pinDest:         "pin-dest",
   trails:          "trails",
   events:          "events",
+  waterStops:      "water-stops",
 } as const;
 
 /** Source IDs */
@@ -97,6 +98,7 @@ export const SOURCE_IDS = {
   routeFast: "route-fast",
   routeCool: "route-cool",
   pins:      "pins",
-  trails:    "trails",
-  events:    "events",
+  trails:      "trails",
+  events:      "events",
+  waterStops:  "water-stops",
 } as const;
