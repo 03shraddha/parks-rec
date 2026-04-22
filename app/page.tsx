@@ -386,11 +386,19 @@ export default function HomePage() {
               setEventsLoading(false);
               toggleLayer("events");
             }}
-            onLocationSearch={(location) => {
+            onLocationSearch={async (location) => {
               setEventsLocation(location);
               setEventsFetchKey((k) => k + 1);
               setEventsList([]);
               setEventsLoading(true);
+              // Fly map to the searched neighbourhood so the user sees pins for that area
+              try {
+                const results = await geocodeQuery(location);
+                if (results[0]) {
+                  const [lng, lat] = results[0].center;
+                  mapHandleRef.current?.flyTo(lng, lat, 14);
+                }
+              } catch { /* silently ignore */ }
             }}
             routeCoords={routeCoords ?? undefined}
           />
