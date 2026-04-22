@@ -68,6 +68,7 @@ export default function HomePage() {
     busStops: false,
     trails: false,
     events: false,
+    water: false,
   });
 
   // ── Route state ──────────────────────────────────────────────────────────
