@@ -15,6 +15,7 @@ interface EventsPanelProps {
   onClose: () => void;
   onLocationSearch?: (location: string) => void;
   routeCoords?: [number, number][];
+  searchedLocation?: string;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -62,7 +63,7 @@ function isNearRoute(eventCoord: [number, number], routeCoords: [number, number]
   return false;
 }
 
-export default function EventsPanel({ events, isLoading, onEventSelect, onClose, onLocationSearch, routeCoords }: EventsPanelProps) {
+export default function EventsPanel({ events, isLoading, onEventSelect, onClose, onLocationSearch, routeCoords, searchedLocation }: EventsPanelProps) {
   const [locationQuery, setLocationQuery] = useState("");
   const touchStartY = useRef<number>(0);
 
@@ -104,10 +105,12 @@ export default function EventsPanel({ events, isLoading, onEventSelect, onClose,
       <div className="flex items-center justify-between px-4 pt-3 pb-2.5 shrink-0" style={{ borderBottom: "1px solid rgba(148,163,184,0.08)" }}>
         <div>
           <p className="font-grotesk font-bold text-sm" style={{ color: "var(--text-display)" }}>
-            Events Near You
+            {searchedLocation
+              ? `Events near ${searchedLocation.charAt(0).toUpperCase() + searchedLocation.slice(1)}`
+              : "Events Near You"}
           </p>
           <p className="text-tertiary" style={{ marginTop: "1px" }}>
-            {isLoading ? "Loading..." : `${events.length} events`} · Bengaluru
+            {isLoading ? "Searching..." : `${events.length} events`} · Bengaluru
           </p>
           <p className="font-grotesk text-xs" style={{ color: "rgba(244,114,182,0.6)", marginTop: "2px" }}>
             Live + curated · Search any neighbourhood

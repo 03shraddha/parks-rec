@@ -377,6 +377,7 @@ export default function HomePage() {
           <EventsPanel
             events={eventsList}
             isLoading={eventsLoading}
+            searchedLocation={eventsLocation}
             onEventSelect={(lng, lat, info) => {
               mapHandleRef.current?.flyTo(lng, lat, 15);
               setEventInfo({ ...info, lng, lat });
