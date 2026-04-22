@@ -100,6 +100,8 @@ export default function HomePage() {
   const [eventsList, setEventsList] = useState<EventFeature[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [eventsLocation, setEventsLocation] = useState<string | undefined>(undefined);
+  // Increment on every search so the Map useEffect re-runs even for the same location string
+  const [eventsFetchKey, setEventsFetchKey] = useState(0);
 
   // ── Onboarding ────────────────────────────────────────────────────────────
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -203,6 +205,7 @@ export default function HomePage() {
         visibleLayers={visibleLayers}
         theme={theme}
         eventsLocation={eventsLocation}
+        eventsFetchKey={eventsFetchKey}
         onPinDrop={handlePinDrop}
         onSegmentClick={setSegmentInfo}
         onEventClick={setEventInfo}
@@ -385,6 +388,7 @@ export default function HomePage() {
             }}
             onLocationSearch={(location) => {
               setEventsLocation(location);
+              setEventsFetchKey((k) => k + 1);
               setEventsList([]);
               setEventsLoading(true);
             }}

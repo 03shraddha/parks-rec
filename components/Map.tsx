@@ -91,7 +91,8 @@ interface MapProps {
   coolRoute: ScoredRoute | null;
   visibleLayers: LayerVisibility;
   theme: Theme;
-  eventsLocation?: string; // when set, re-fetches events for this location
+  eventsLocation?: string;
+  eventsFetchKey?: number; // incremented on every search to force refetch for same location
   onPinDrop: (mode: "origin" | "destination", coord: Coordinate) => void;
   onSegmentClick: (info: SegmentInfo) => void;
   onEventClick: (info: EventInfo) => void;
@@ -111,6 +112,7 @@ export default function Map({
   visibleLayers,
   theme,
   eventsLocation,
+  eventsFetchKey,
   onPinDrop,
   onSegmentClick,
   onEventClick,
@@ -445,7 +447,11 @@ export default function Map({
 
     const apply = () => {
       const source = map.getSource(SOURCE_IDS.events) as maplibregl.GeoJSONSource | undefined;
-      if (!source) return;
+      if (!source) {
+        // Source missing (e.g. style mid-reload) — don't leave loading stuck
+        if (onEventsLoaded) onEventsLoaded([]);
+        return;
+      }
 
       if (visibleLayers.events) {
         setEventsError(false);
@@ -495,7 +501,7 @@ export default function Map({
     }
     apply();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleLayers.events, eventsLocation]);
+  }, [visibleLayers.events, eventsLocation, eventsFetchKey]);
 
   return (
     <div className="absolute inset-0 w-full h-full">
