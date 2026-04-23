@@ -588,6 +588,27 @@
           12.9342
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.698397,
+          12.9568328
+        ]
+      },
+      "properties": {
+        "title": "eChai Bangalore Startup Network",
+        "date": "",
+        "time": "",
+        "venue": "Share",
+        "address": "Share, Bengaluru",
+        "ticket_url": "https://www.meetup.com/startupbangalore/?eventOrigin=event_home_page",
+        "more_info_url": "https://www.meetup.com/startupbangalore/?eventOrigin=event_home_page",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
