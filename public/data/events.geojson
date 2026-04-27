@@ -67,27 +67,6 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Short Film Festival",
-        "date": "Saturday, April 26",
-        "time": "3:00 PM - 9:00 PM",
-        "venue": "Jagriti Theatre",
-        "address": "Aqueel Plaza, Whitefield Main Road, Bengaluru 560066",
-        "ticket_url": null,
-        "more_info_url": "https://jagriti.in",
-        "thumbnail": null,
-        "category": "Cultural"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.7498,
-          12.9783
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "title": "Metro Art Fair - Open Gallery Day",
         "date": "Every Sunday",
         "time": "10:00 AM - 8:00 PM",
@@ -172,27 +151,6 @@
     {
       "type": "Feature",
       "properties": {
-        "title": "Carnatic Evening Concert",
-        "date": "Friday, April 25",
-        "time": "6:00 PM - 8:30 PM",
-        "venue": "Indian Institute of World Culture",
-        "address": "6/7, Bhawani Singh Road, Basavangudi, Bengaluru 560004",
-        "ticket_url": null,
-        "more_info_url": null,
-        "thumbnail": null,
-        "category": "Cultural"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.5745,
-          12.9437
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "title": "Environmental Awareness Walk",
         "date": "Every Sunday",
         "time": "7:00 AM - 9:00 AM",
@@ -229,27 +187,6 @@
         "coordinates": [
           77.5843,
           12.9512
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "title": "IISc Open Day - Campus Science Walk",
-        "date": "Saturday, April 26",
-        "time": "9:00 AM - 5:00 PM",
-        "venue": "Indian Institute of Science",
-        "address": "CV Raman Avenue, Mathikere, Bengaluru 560012",
-        "ticket_url": null,
-        "more_info_url": null,
-        "thumbnail": null,
-        "category": "Cultural"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.5673,
-          13.0213
         ]
       }
     },
