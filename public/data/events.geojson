@@ -546,6 +546,69 @@
         "thumbnail": null,
         "category": "Community"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5661839,
+          13.0118139
+        ]
+      },
+      "properties": {
+        "title": "Free Events and Things to do in Bangalore, India this weekend",
+        "date": "",
+        "time": "",
+        "venue": "Filters",
+        "address": "Filters, Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/d/india--bangalore/free--events--this-weekend/",
+        "more_info_url": "https://www.eventbrite.com/d/india--bangalore/free--events--this-weekend/",
+        "thumbnail": null,
+        "category": "Community"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5661839,
+          13.0118139
+        ]
+      },
+      "properties": {
+        "title": "Free Things to Do in India Today - Events & Activities",
+        "date": "",
+        "time": "",
+        "venue": "Filters",
+        "address": "Filters, Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/d/india/free--events--today/",
+        "more_info_url": "https://www.eventbrite.com/d/india/free--events--today/",
+        "thumbnail": null,
+        "category": "Community"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5661839,
+          13.0118139
+        ]
+      },
+      "properties": {
+        "title": "Discover Social Events & Activities in Bangalore, India",
+        "date": "",
+        "time": "",
+        "venue": "Filters",
+        "address": "Filters, Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/d/india--bangalore/social-events/",
+        "more_info_url": "https://www.eventbrite.com/d/india--bangalore/social-events/",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
