@@ -630,6 +630,27 @@
         "thumbnail": null,
         "category": "Community"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5821562,
+          12.9774757
+        ]
+      },
+      "properties": {
+        "title": "EVENTS AND THINGS TO DO NEAR FREEDOM PARK",
+        "date": "",
+        "time": "",
+        "venue": "FREEDOM PARK",
+        "address": "FREEDOM PARK, Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/poi/india--bangalore/freedom-park--WqGRv/",
+        "more_info_url": "https://www.eventbrite.com/poi/india--bangalore/freedom-park--WqGRv/",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
