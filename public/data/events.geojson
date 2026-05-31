@@ -651,6 +651,48 @@
         "thumbnail": null,
         "category": "Community"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5661839,
+          13.0118139
+        ]
+      },
+      "properties": {
+        "title": "Discover Hsr Layout Events & Activities in Bangalore, India",
+        "date": "",
+        "time": "",
+        "venue": "Filters",
+        "address": "Filters, Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/d/india--bangalore/hsr-layout/",
+        "more_info_url": "https://www.eventbrite.com/d/india--bangalore/hsr-layout/",
+        "thumbnail": null,
+        "category": "Community"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5661839,
+          13.0118139
+        ]
+      },
+      "properties": {
+        "title": "Discover Koramangala Events & Activities in Bangalore, India",
+        "date": "",
+        "time": "",
+        "venue": "Filters",
+        "address": "Filters, Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/d/india--bangalore/koramangala/",
+        "more_info_url": "https://www.eventbrite.com/d/india--bangalore/koramangala/",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
