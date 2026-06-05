@@ -714,6 +714,27 @@
         "thumbnail": null,
         "category": "Community"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5661839,
+          13.0118139
+        ]
+      },
+      "properties": {
+        "title": "Discover Workshops Events & Activities in Bangalore, India",
+        "date": "Aug 5",
+        "time": "9:00 AM",
+        "venue": "Filters",
+        "address": "Filters, Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/d/india--bangalore/workshops/",
+        "more_info_url": "https://www.eventbrite.com/d/india--bangalore/workshops/",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
