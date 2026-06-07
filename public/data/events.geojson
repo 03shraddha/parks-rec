@@ -735,6 +735,27 @@
         "thumbnail": null,
         "category": "Community"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5661839,
+          13.0118139
+        ]
+      },
+      "properties": {
+        "title": "Events and Things to do in Bangalore, India tomorrow",
+        "date": "",
+        "time": "",
+        "venue": "Filters",
+        "address": "Filters, Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/d/india--bangalore/events--tomorrow/",
+        "more_info_url": "https://www.eventbrite.com/d/india--bangalore/events--tomorrow/",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
