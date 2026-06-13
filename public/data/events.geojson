@@ -756,6 +756,27 @@
         "thumbnail": null,
         "category": "Community"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6356886,
+          13.0256878
+        ]
+      },
+      "properties": {
+        "title": ".css-x6ruw1{font-weight:700;color:#00b9f5;} All  Art     .css-12d1bye{display:inline-block;min-width:70px;} ( 0 )",
+        "date": "",
+        "time": "",
+        "venue": "Events in Bengaluru",
+        "address": "Events in Bengaluru, Bengaluru",
+        "ticket_url": "https://insider.in/all-events-in-bengaluru/art?type=physical",
+        "more_info_url": "https://insider.in/all-events-in-bengaluru/art?type=physical",
+        "thumbnail": null,
+        "category": "Cultural"
+      }
     }
   ]
 }
