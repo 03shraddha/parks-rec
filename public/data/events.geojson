@@ -777,6 +777,27 @@
         "thumbnail": null,
         "category": "Cultural"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6118686,
+          12.9697506
+        ]
+      },
+      "properties": {
+        "title": "Pencil & Chai Fine arts Gurukul - Bangalore Fine Arts Meetup",
+        "date": "",
+        "time": "",
+        "venue": "Share",
+        "address": "Share, Bengaluru",
+        "ticket_url": "https://www.meetup.com/pencilandchai/",
+        "more_info_url": "https://www.meetup.com/pencilandchai/",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
