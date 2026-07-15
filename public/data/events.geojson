@@ -819,6 +819,27 @@
         "thumbnail": null,
         "category": "Community"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.5661839,
+          13.0118139
+        ]
+      },
+      "properties": {
+        "title": "Free Things to Do in Bangalore, India This Weekend",
+        "date": "",
+        "time": "6:00 PM",
+        "venue": "Filters (2)",
+        "address": "Filters (2), Bengaluru",
+        "ticket_url": "https://www.eventbrite.com/d/india--bangalore/free--events--this-weekend/",
+        "more_info_url": "https://www.eventbrite.com/d/india--bangalore/free--events--this-weekend/",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
