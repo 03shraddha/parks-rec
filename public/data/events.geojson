@@ -819,27 +819,6 @@
         "thumbnail": null,
         "category": "Community"
       }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.5695584,
-          12.8591571
-        ]
-      },
-      "properties": {
-        "title": "Walk with date - Bengaluru, Fri, Aug 21, 2026, 7:30 PM",
-        "date": "Fri, Aug 21, 2026",
-        "time": "7:30 PM",
-        "venue": "Events in Bangalore, IN",
-        "address": "Events in Bangalore, IN, Bengaluru",
-        "ticket_url": "https://www.meetup.com/meetup-group-nfkdhmul/events/lwfrxtyjclbcc/",
-        "more_info_url": "https://www.meetup.com/meetup-group-nfkdhmul/events/lwfrxtyjclbcc/",
-        "thumbnail": null,
-        "category": "Community"
-      }
     }
   ]
 }
