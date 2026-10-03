@@ -819,6 +819,27 @@
         "thumbnail": null,
         "category": "Community"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.6067902,
+          12.9755264
+        ]
+      },
+      "properties": {
+        "title": "Kecak - Bali in Bengaluru Multi Language theatre-plays Play in Bengaluru Tickets",
+        "date": "",
+        "time": "",
+        "venue": "Theatre",
+        "address": "Theatre, Bengaluru",
+        "ticket_url": "https://in.bookmyshow.com/plays/kecak/ET00517596",
+        "more_info_url": "https://in.bookmyshow.com/plays/kecak/ET00517596",
+        "thumbnail": null,
+        "category": "Community"
+      }
     }
   ]
 }
